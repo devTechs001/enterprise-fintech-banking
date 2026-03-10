@@ -1,0 +1,6095 @@
+# Enterprise Fintech Banking Application Structure
+
+## Complete Project Architecture
+
+```
+enterprise-fintech-banking/
+├── .github/
+│   ├── workflows/
+│   │   ├── ci.yml
+│   │   ├── cd.yml
+│   │   ├── security-scan.yml
+│   │   └── code-quality.yml
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.md
+│   │   └── feature_request.md
+│   ├── PULL_REQUEST_TEMPLATE.md
+│   └── CODEOWNERS
+├── docker/
+│   ├── client/
+│   │   ├── Dockerfile
+│   │   └── Dockerfile.prod
+│   ├── server/
+│   │   ├── Dockerfile
+│   │   └── Dockerfile.prod
+│   ├── nginx/
+│   │   ├── nginx.conf
+│   │   └── ssl/
+│   └── docker-compose.yml
+├── docs/
+│   ├── api/
+│   │   ├── swagger.yaml
+│   │   └── postman_collection.json
+│   ├── architecture/
+│   │   ├── system-design.md
+│   │   ├── database-schema.md
+│   │   └── diagrams/
+│   ├── deployment/
+│   │   └── deployment-guide.md
+│   └── security/
+│       ├── security-policy.md
+│       └── compliance.md
+├── scripts/
+│   ├── setup.sh
+│   ├── deploy.sh
+│   ├── db-migrate.sh
+│   ├── db-seed.sh
+│   └── generate-keys.sh
+├── client/
+│   └── [DETAILED BELOW]
+├── server/
+│   └── [DETAILED BELOW]
+├── shared/
+│   ├── constants/
+│   │   ├── index.js
+│   │   ├── transactionTypes.js
+│   │   ├── accountTypes.js
+│   │   └── currencies.js
+│   ├── types/
+│   │   ├── index.d.ts
+│   │   ├── user.types.js
+│   │   ├── account.types.js
+│   │   └── transaction.types.js
+│   ├── validations/
+│   │   ├── schemas.js
+│   │   └── rules.js
+│   └── utils/
+│       ├── formatters.js
+│       └── validators.js
+├── .env.example
+├── .gitignore
+├── .eslintrc.js
+├── .prettierrc
+├── docker-compose.yml
+├── docker-compose.prod.yml
+├── Makefile
+├── package.json
+├── lerna.json
+└── README.md
+```
+
+---
+
+## 📁 CLIENT STRUCTURE
+
+```
+client/
+├── .husky/
+│   ├── pre-commit
+│   └── commit-msg
+├── public/
+│   ├── favicon.ico
+│   ├── logo192.png
+│   ├── logo512.png
+│   ├── manifest.json
+│   ├── robots.txt
+│   └── locales/
+│       ├── en/
+│       │   └── translation.json
+│       ├── es/
+│       │   └── translation.json
+│       └── fr/
+│           └── translation.json
+├── src/
+│   ├── api/
+│   │   ├── index.js
+│   │   ├── axiosInstance.js
+│   │   ├── interceptors/
+│   │   │   ├── requestInterceptor.js
+│   │   │   ├── responseInterceptor.js
+│   │   │   └── errorInterceptor.js
+│   │   ├── endpoints/
+│   │   │   ├── auth.endpoints.js
+│   │   │   ├── accounts.endpoints.js
+│   │   │   ├── transactions.endpoints.js
+│   │   │   ├── cards.endpoints.js
+│   │   │   ├── loans.endpoints.js
+│   │   │   ├── investments.endpoints.js
+│   │   │   └── notifications.endpoints.js
+│   │   └── queries/
+│   │       ├── useAuthQueries.js
+│   │       ├── useAccountQueries.js
+│   │       ├── useTransactionQueries.js
+│   │       └── useNotificationQueries.js
+│   ├── app/
+│   │   ├── App.jsx
+│   │   ├── AppProviders.jsx
+│   │   └── AppRoutes.jsx
+│   ├── assets/
+│   │   ├── fonts/
+│   │   │   ├── Inter/
+│   │   │   └── Roboto/
+│   │   ├── icons/
+│   │   │   ├── banking/
+│   │   │   ├── navigation/
+│   │   │   └── status/
+│   │   ├── images/
+│   │   │   ├── backgrounds/
+│   │   │   ├── illustrations/
+│   │   │   └── logos/
+│   │   ├── animations/
+│   │   │   └── lottie/
+│   │   └── videos/
+│   ├── components/
+│   │   ├── common/
+│   │   │   ├── Button/
+│   │   │   │   ├── Button.jsx
+│   │   │   │   ├── Button.test.jsx
+│   │   │   │   ├── Button.stories.jsx
+│   │   │   │   └── index.js
+│   │   │   ├── Input/
+│   │   │   │   ├── Input.jsx
+│   │   │   │   ├── Input.test.jsx
+│   │   │   │   └── index.js
+│   │   │   ├── Modal/
+│   │   │   │   ├── Modal.jsx
+│   │   │   │   ├── ModalHeader.jsx
+│   │   │   │   ├── ModalBody.jsx
+│   │   │   │   ├── ModalFooter.jsx
+│   │   │   │   └── index.js
+│   │   │   ├── Card/
+│   │   │   ├── Table/
+│   │   │   ├── Dropdown/
+│   │   │   ├── Tabs/
+│   │   │   ├── Avatar/
+│   │   │   ├── Badge/
+│   │   │   ├── Tooltip/
+│   │   │   ├── Skeleton/
+│   │   │   ├── Spinner/
+│   │   │   ├── Alert/
+│   │   │   ├── Toast/
+│   │   │   ├── Pagination/
+│   │   │   ├── Breadcrumb/
+│   │   │   ├── Stepper/
+│   │   │   ├── ProgressBar/
+│   │   │   ├── DatePicker/
+│   │   │   ├── Select/
+│   │   │   ├── Checkbox/
+│   │   │   ├── Radio/
+│   │   │   ├── Switch/
+│   │   │   ├── FileUpload/
+│   │   │   ├── SearchInput/
+│   │   │   ├── OTPInput/
+│   │   │   ├── PinInput/
+│   │   │   ├── CurrencyInput/
+│   │   │   ├── PhoneInput/
+│   │   │   ├── Accordion/
+│   │   │   ├── Drawer/
+│   │   │   ├── Popover/
+│   │   │   └── index.js
+│   │   ├── layout/
+│   │   │   ├── MainLayout/
+│   │   │   │   ├── MainLayout.jsx
+│   │   │   │   ├── Header/
+│   │   │   │   │   ├── Header.jsx
+│   │   │   │   │   ├── HeaderLogo.jsx
+│   │   │   │   │   ├── HeaderNav.jsx
+│   │   │   │   │   ├── HeaderSearch.jsx
+│   │   │   │   │   ├── HeaderNotifications.jsx
+│   │   │   │   │   ├── HeaderProfile.jsx
+│   │   │   │   │   └── index.js
+│   │   │   │   ├── Sidebar/
+│   │   │   │   │   ├── Sidebar.jsx
+│   │   │   │   │   ├── SidebarItem.jsx
+│   │   │   │   │   ├── SidebarGroup.jsx
+│   │   │   │   │   ├── SidebarFooter.jsx
+│   │   │   │   │   └── index.js
+│   │   │   │   ├── Footer/
+│   │   │   │   │   ├── Footer.jsx
+│   │   │   │   │   └── index.js
+│   │   │   │   └── index.js
+│   │   │   ├── AuthLayout/
+│   │   │   │   ├── AuthLayout.jsx
+│   │   │   │   └── index.js
+│   │   │   ├── DashboardLayout/
+│   │   │   │   ├── DashboardLayout.jsx
+│   │   │   │   └── index.js
+│   │   │   ├── OnboardingLayout/
+│   │   │   │   ├── OnboardingLayout.jsx
+│   │   │   │   └── index.js
+│   │   │   └── ErrorLayout/
+│   │   │       ├── ErrorLayout.jsx
+│   │   │       └── index.js
+│   │   ├── forms/
+│   │   │   ├── LoginForm/
+│   │   │   │   ├── LoginForm.jsx
+│   │   │   │   ├── LoginForm.validation.js
+│   │   │   │   └── index.js
+│   │   │   ├── RegisterForm/
+│   │   │   ├── TransferForm/
+│   │   │   ├── PaymentForm/
+│   │   │   ├── LoanApplicationForm/
+│   │   │   ├── CardApplicationForm/
+│   │   │   ├── ProfileForm/
+│   │   │   ├── SecuritySettingsForm/
+│   │   │   ├── BeneficiaryForm/
+│   │   │   ├── KYCForm/
+│   │   │   └── index.js
+│   │   ├── banking/
+│   │   │   ├── AccountCard/
+│   │   │   │   ├── AccountCard.jsx
+│   │   │   │   ├── AccountCardSkeleton.jsx
+│   │   │   │   └── index.js
+│   │   │   ├── TransactionList/
+│   │   │   │   ├── TransactionList.jsx
+│   │   │   │   ├── TransactionItem.jsx
+│   │   │   │   ├── TransactionFilters.jsx
+│   │   │   │   └── index.js
+│   │   │   ├── BalanceDisplay/
+│   │   │   ├── QuickActions/
+│   │   │   ├── RecentActivity/
+│   │   │   ├── SpendingChart/
+│   │   │   ├── BudgetTracker/
+│   │   │   ├── SavingsGoal/
+│   │   │   ├── CreditScore/
+│   │   │   └── index.js
+│   │   ├── cards/
+│   │   │   ├── VirtualCard/
+│   │   │   │   ├── VirtualCard.jsx
+│   │   │   │   ├── CardFront.jsx
+│   │   │   │   ├── CardBack.jsx
+│   │   │   │   └── index.js
+│   │   │   ├── CardCarousel/
+│   │   │   ├── CardControls/
+│   │   │   ├── CardTransactions/
+│   │   │   └── index.js
+│   │   ├── transfers/
+│   │   │   ├── TransferWizard/
+│   │   │   ├── BeneficiarySelector/
+│   │   │   ├── AmountInput/
+│   │   │   ├── TransferConfirmation/
+│   │   │   ├── TransferReceipt/
+│   │   │   └── index.js
+│   │   ├── payments/
+│   │   │   ├── BillPayment/
+│   │   │   ├── QRPayment/
+│   │   │   ├── ScheduledPayments/
+│   │   │   ├── PaymentHistory/
+│   │   │   └── index.js
+│   │   ├── investments/
+│   │   │   ├── PortfolioOverview/
+│   │   │   ├── StockChart/
+│   │   │   ├── InvestmentCard/
+│   │   │   ├── AssetAllocation/
+│   │   │   └── index.js
+│   │   ├── loans/
+│   │   │   ├── LoanCalculator/
+│   │   │   ├── LoanStatus/
+│   │   │   ├── EMISchedule/
+│   │   │   ├── LoanComparison/
+│   │   │   └── index.js
+│   │   ├── notifications/
+│   │   │   ├── NotificationCenter/
+│   │   │   ├── NotificationItem/
+│   │   │   ├── NotificationBadge/
+│   │   │   └── index.js
+│   │   ├── charts/
+│   │   │   ├── LineChart/
+│   │   │   ├── BarChart/
+│   │   │   ├── PieChart/
+│   │   │   ├── AreaChart/
+│   │   │   ├── DonutChart/
+│   │   │   └── index.js
+│   │   ├── security/
+│   │   │   ├── TwoFactorAuth/
+│   │   │   ├── BiometricAuth/
+│   │   │   ├── SecurityQuestions/
+│   │   │   ├── SessionManager/
+│   │   │   ├── DeviceManager/
+│   │   │   └── index.js
+│   │   └── index.js
+│   ├── config/
+│   │   ├── index.js
+│   │   ├── app.config.js
+│   │   ├── api.config.js
+│   │   ├── auth.config.js
+│   │   ├── theme.config.js
+│   │   ├── routes.config.js
+│   │   ├── i18n.config.js
+│   │   ├── analytics.config.js
+│   │   └── feature-flags.config.js
+│   ├── constants/
+│   │   ├── index.js
+│   │   ├── app.constants.js
+│   │   ├── routes.constants.js
+│   │   ├── api.constants.js
+│   │   ├── storage.constants.js
+│   │   ├── validation.constants.js
+│   │   ├── transaction.constants.js
+│   │   ├── account.constants.js
+│   │   └── error.constants.js
+│   ├── context/
+│   │   ├── AuthContext/
+│   │   │   ├── AuthContext.jsx
+│   │   │   ├── AuthProvider.jsx
+│   │   │   ├── useAuth.js
+│   │   │   └── index.js
+│   │   ├── ThemeContext/
+│   │   │   ├── ThemeContext.jsx
+│   │   │   ├── ThemeProvider.jsx
+│   │   │   ├── useTheme.js
+│   │   │   └── index.js
+│   │   ├── NotificationContext/
+│   │   ├── SidebarContext/
+│   │   ├── ModalContext/
+│   │   ├── WebSocketContext/
+│   │   └── index.js
+│   ├── features/
+│   │   ├── auth/
+│   │   │   ├── components/
+│   │   │   ├── hooks/
+│   │   │   ├── services/
+│   │   │   ├── store/
+│   │   │   │   ├── authSlice.js
+│   │   │   │   ├── authSelectors.js
+│   │   │   │   └── authThunks.js
+│   │   │   ├── utils/
+│   │   │   └── index.js
+│   │   ├── dashboard/
+│   │   │   ├── components/
+│   │   │   ├── hooks/
+│   │   │   ├── services/
+│   │   │   └── index.js
+│   │   ├── accounts/
+│   │   │   ├── components/
+│   │   │   ├── hooks/
+│   │   │   ├── services/
+│   │   │   ├── store/
+│   │   │   └── index.js
+│   │   ├── transactions/
+│   │   ├── transfers/
+│   │   ├── payments/
+│   │   ├── cards/
+│   │   ├── loans/
+│   │   ├── investments/
+│   │   ├── settings/
+│   │   ├── notifications/
+│   │   ├── support/
+│   │   └── analytics/
+│   ├── hooks/
+│   │   ├── api/
+│   │   │   ├── useApi.js
+│   │   │   ├── useFetch.js
+│   │   │   ├── useMutation.js
+│   │   │   ├── useInfiniteScroll.js
+│   │   │   └── index.js
+│   │   ├── auth/
+│   │   │   ├── useAuth.js
+│   │   │   ├── usePermissions.js
+│   │   │   ├── useSession.js
+│   │   │   └── index.js
+│   │   ├── ui/
+│   │   │   ├── useModal.js
+│   │   │   ├── useToast.js
+│   │   │   ├── useDrawer.js
+│   │   │   ├── useMediaQuery.js
+│   │   │   ├── useClickOutside.js
+│   │   │   ├── useKeyPress.js
+│   │   │   ├── useScrollPosition.js
+│   │   │   ├── useLocalStorage.js
+│   │   │   ├── useSessionStorage.js
+│   │   │   ├── useCopyToClipboard.js
+│   │   │   ├── useDebounce.js
+│   │   │   ├── useThrottle.js
+│   │   │   ├── usePagination.js
+│   │   │   ├── useCountdown.js
+│   │   │   ├── useToggle.js
+│   │   │   ├── useWindowSize.js
+│   │   │   ├── useOnScreen.js
+│   │   │   └── index.js
+│   │   ├── banking/
+│   │   │   ├── useAccounts.js
+│   │   │   ├── useTransactions.js
+│   │   │   ├── useTransfer.js
+│   │   │   ├── useCards.js
+│   │   │   ├── useLoans.js
+│   │   │   ├── useInvestments.js
+│   │   │   ├── useBeneficiaries.js
+│   │   │   ├── useBalanceRefresh.js
+│   │   │   └── index.js
+│   │   ├── form/
+│   │   │   ├── useForm.js
+│   │   │   ├── useFormValidation.js
+│   │   │   ├── useFormField.js
+│   │   │   ├── useFormStep.js
+│   │   │   └── index.js
+│   │   └── index.js
+│   ├── lib/
+│   │   ├── axios/
+│   │   │   ├── axiosClient.js
+│   │   │   └── index.js
+│   │   ├── socket/
+│   │   │   ├── socketClient.js
+│   │   │   ├── socketEvents.js
+│   │   │   └── index.js
+│   │   ├── analytics/
+│   │   │   ├── googleAnalytics.js
+│   │   │   ├── mixpanel.js
+│   │   │   ├── sentry.js
+│   │   │   └── index.js
+│   │   ├── encryption/
+│   │   │   ├── aes.js
+│   │   │   ├── rsa.js
+│   │   │   └── index.js
+│   │   ├── storage/
+│   │   │   ├── localStorage.js
+│   │   │   ├── sessionStorage.js
+│   │   │   ├── secureStorage.js
+│   │   │   └── index.js
+│   │   ├── pdf/
+│   │   │   ├── pdfGenerator.js
+│   │   │   └── index.js
+│   │   ├── qrcode/
+│   │   │   ├── qrGenerator.js
+│   │   │   ├── qrScanner.js
+│   │   │   └── index.js
+│   │   └── biometric/
+│   │       ├── fingerprint.js
+│   │       ├── faceId.js
+│   │       └── index.js
+│   ├── pages/
+│   │   ├── public/
+│   │   │   ├── Landing/
+│   │   │   │   ├── Landing.jsx
+│   │   │   │   ├── sections/
+│   │   │   │   │   ├── Hero.jsx
+│   │   │   │   │   ├── Features.jsx
+│   │   │   │   │   ├── HowItWorks.jsx
+│   │   │   │   │   ├── Testimonials.jsx
+│   │   │   │   │   ├── Pricing.jsx
+│   │   │   │   │   ├── FAQ.jsx
+│   │   │   │   │   └── CTA.jsx
+│   │   │   │   └── index.js
+│   │   │   ├── About/
+│   │   │   ├── Contact/
+│   │   │   ├── Careers/
+│   │   │   └── Blog/
+│   │   ├── auth/
+│   │   │   ├── Login/
+│   │   │   │   ├── Login.jsx
+│   │   │   │   └── index.js
+│   │   │   ├── Register/
+│   │   │   │   ├── Register.jsx
+│   │   │   │   ├── steps/
+│   │   │   │   │   ├── PersonalInfo.jsx
+│   │   │   │   │   ├── ContactInfo.jsx
+│   │   │   │   │   ├── SecuritySetup.jsx
+│   │   │   │   │   └── Verification.jsx
+│   │   │   │   └── index.js
+│   │   │   ├── ForgotPassword/
+│   │   │   ├── ResetPassword/
+│   │   │   ├── VerifyEmail/
+│   │   │   ├── VerifyPhone/
+│   │   │   ├── TwoFactorAuth/
+│   │   │   └── Onboarding/
+│   │   │       ├── Onboarding.jsx
+│   │   │       ├── steps/
+│   │   │       │   ├── Welcome.jsx
+│   │   │       │   ├── KYCVerification.jsx
+│   │   │       │   ├── DocumentUpload.jsx
+│   │   │       │   ├── AddressProof.jsx
+│   │   │       │   └── Complete.jsx
+│   │   │       └── index.js
+│   │   ├── dashboard/
+│   │   │   ├── Dashboard/
+│   │   │   │   ├── Dashboard.jsx
+│   │   │   │   ├── widgets/
+│   │   │   │   │   ├── AccountsWidget.jsx
+│   │   │   │   │   ├── QuickActionsWidget.jsx
+│   │   │   │   │   ├── TransactionsWidget.jsx
+│   │   │   │   │   ├── SpendingWidget.jsx
+│   │   │   │   │   ├── GoalsWidget.jsx
+│   │   │   │   │   └── AlertsWidget.jsx
+│   │   │   │   └── index.js
+│   │   │   └── Overview/
+│   │   ├── accounts/
+│   │   │   ├── AccountsList/
+│   │   │   ├── AccountDetail/
+│   │   │   ├── CreateAccount/
+│   │   │   ├── AccountStatements/
+│   │   │   └── AccountSettings/
+│   │   ├── transactions/
+│   │   │   ├── TransactionsList/
+│   │   │   ├── TransactionDetail/
+│   │   │   ├── TransactionSearch/
+│   │   │   └── TransactionExport/
+│   │   ├── transfers/
+│   │   │   ├── NewTransfer/
+│   │   │   ├── InternalTransfer/
+│   │   │   ├── ExternalTransfer/
+│   │   │   ├── InternationalTransfer/
+│   │   │   ├── ScheduledTransfers/
+│   │   │   ├── RecurringTransfers/
+│   │   │   ├── TransferHistory/
+│   │   │   └── Beneficiaries/
+│   │   │       ├── BeneficiariesList/
+│   │   │       ├── AddBeneficiary/
+│   │   │       └── EditBeneficiary/
+│   │   ├── payments/
+│   │   │   ├── BillPayments/
+│   │   │   ├── MobileRecharge/
+│   │   │   ├── QRPayment/
+│   │   │   ├── RequestMoney/
+│   │   │   ├── PaymentLinks/
+│   │   │   └── PaymentHistory/
+│   │   ├── cards/
+│   │   │   ├── CardsList/
+│   │   │   ├── CardDetail/
+│   │   │   ├── ApplyCard/
+│   │   │   ├── CardSettings/
+│   │   │   ├── CardControls/
+│   │   │   ├── VirtualCards/
+│   │   │   └── CardStatements/
+│   │   ├── loans/
+│   │   │   ├── LoansDashboard/
+│   │   │   ├── ApplyLoan/
+│   │   │   ├── LoanDetail/
+│   │   │   ├── LoanCalculator/
+│   │   │   ├── LoanRepayment/
+│   │   │   └── LoanHistory/
+│   │   ├── investments/
+│   │   │   ├── Portfolio/
+│   │   │   ├── Stocks/
+│   │   │   ├── MutualFunds/
+│   │   │   ├── FixedDeposits/
+│   │   │   ├── RecurringDeposits/
+│   │   │   ├── SIP/
+│   │   │   └── InvestmentHistory/
+│   │   ├── savings/
+│   │   │   ├── SavingsGoals/
+│   │   │   ├── CreateGoal/
+│   │   │   ├── GoalDetail/
+│   │   │   └── AutoSave/
+│   │   ├── analytics/
+│   │   │   ├── SpendingAnalytics/
+│   │   │   ├── IncomeAnalytics/
+│   │   │   ├── BudgetAnalytics/
+│   │   │   ├── CashflowAnalytics/
+│   │   │   └── Reports/
+│   │   ├── settings/
+│   │   │   ├── Profile/
+│   │   │   ├── Security/
+│   │   │   │   ├── ChangePassword/
+│   │   │   │   ├── TwoFactorSetup/
+│   │   │   │   ├── BiometricSetup/
+│   │   │   │   ├── SecurityQuestions/
+│   │   │   │   ├── ActiveSessions/
+│   │   │   │   └── LoginHistory/
+│   │   │   ├── Notifications/
+│   │   │   ├── Privacy/
+│   │   │   ├── Preferences/
+│   │   │   ├── LinkedAccounts/
+│   │   │   └── CloseAccount/
+│   │   ├── support/
+│   │   │   ├── HelpCenter/
+│   │   │   ├── FAQ/
+│   │   │   ├── ContactSupport/
+│   │   │   ├── LiveChat/
+│   │   │   ├── Tickets/
+│   │   │   └── Feedback/
+│   │   ├── notifications/
+│   │   │   ├── NotificationsCenter/
+│   │   │   └── NotificationSettings/
+│   │   └── errors/
+│   │       ├── NotFound/
+│   │       ├── ServerError/
+│   │       ├── Maintenance/
+│   │       ├── Unauthorized/
+│   │       └── Forbidden/
+│   ├── routes/
+│   │   ├── index.jsx
+│   │   ├── publicRoutes.jsx
+│   │   ├── authRoutes.jsx
+│   │   ├── dashboardRoutes.jsx
+│   │   ├── accountRoutes.jsx
+│   │   ├── transactionRoutes.jsx
+│   │   ├── transferRoutes.jsx
+│   │   ├── paymentRoutes.jsx
+│   │   ├── cardRoutes.jsx
+│   │   ├── loanRoutes.jsx
+│   │   ├── investmentRoutes.jsx
+│   │   ├── settingsRoutes.jsx
+│   │   └── guards/
+│   │       ├── AuthGuard.jsx
+│   │       ├── GuestGuard.jsx
+│   │       ├── RoleGuard.jsx
+│   │       ├── PermissionGuard.jsx
+│   │       ├── KYCGuard.jsx
+│   │       └── index.js
+│   ├── services/
+│   │   ├── api/
+│   │   │   ├── authService.js
+│   │   │   ├── userService.js
+│   │   │   ├── accountService.js
+│   │   │   ├── transactionService.js
+│   │   │   ├── transferService.js
+│   │   │   ├── paymentService.js
+│   │   │   ├── cardService.js
+│   │   │   ├── loanService.js
+│   │   │   ├── investmentService.js
+│   │   │   ├── notificationService.js
+│   │   │   ├── analyticsService.js
+│   │   │   └── index.js
+│   │   ├── auth/
+│   │   │   ├── authTokenService.js
+│   │   │   ├── sessionService.js
+│   │   │   ├── biometricService.js
+│   │   │   └── index.js
+│   │   ├── storage/
+│   │   │   ├── localStorageService.js
+│   │   │   ├── sessionStorageService.js
+│   │   │   ├── secureStorageService.js
+│   │   │   └── index.js
+│   │   ├── notification/
+│   │   │   ├── pushNotificationService.js
+│   │   │   ├── inAppNotificationService.js
+│   │   │   └── index.js
+│   │   ├── websocket/
+│   │   │   ├── websocketService.js
+│   │   │   ├── realtimeService.js
+│   │   │   └── index.js
+│   │   └── index.js
+│   ├── store/
+│   │   ├── index.js
+│   │   ├── rootReducer.js
+│   │   ├── rootSaga.js
+│   │   ├── persistConfig.js
+│   │   ├── slices/
+│   │   │   ├── authSlice.js
+│   │   │   ├── userSlice.js
+│   │   │   ├── accountSlice.js
+│   │   │   ├── transactionSlice.js
+│   │   │   ├── transferSlice.js
+│   │   │   ├── cardSlice.js
+│   │   │   ├── loanSlice.js
+│   │   │   ├── investmentSlice.js
+│   │   │   ├── notificationSlice.js
+│   │   │   ├── uiSlice.js
+│   │   │   └── index.js
+│   │   ├── selectors/
+│   │   │   ├── authSelectors.js
+│   │   │   ├── userSelectors.js
+│   │   │   ├── accountSelectors.js
+│   │   │   ├── transactionSelectors.js
+│   │   │   └── index.js
+│   │   ├── thunks/
+│   │   │   ├── authThunks.js
+│   │   │   ├── accountThunks.js
+│   │   │   ├── transactionThunks.js
+│   │   │   └── index.js
+│   │   ├── sagas/
+│   │   │   ├── authSaga.js
+│   │   │   ├── accountSaga.js
+│   │   │   ├── transactionSaga.js
+│   │   │   └── index.js
+│   │   └── middleware/
+│   │       ├── loggerMiddleware.js
+│   │       ├── errorMiddleware.js
+│   │       ├── analyticsMiddleware.js
+│   │       └── index.js
+│   ├── styles/
+│   │   ├── globals.css
+│   │   ├── tailwind.css
+│   │   ├── variables.css
+│   │   ├── typography.css
+│   │   ├── animations.css
+│   │   ├── utilities.css
+│   │   └── themes/
+│   │       ├── light.css
+│   │       ├── dark.css
+│   │       └── index.js
+│   ├── types/
+│   │   ├── index.d.ts
+│   │   ├── api.types.js
+│   │   ├── auth.types.js
+│   │   ├── user.types.js
+│   │   ├── account.types.js
+│   │   ├── transaction.types.js
+│   │   ├── transfer.types.js
+│   │   ├── card.types.js
+│   │   ├── loan.types.js
+│   │   ├── investment.types.js
+│   │   └── notification.types.js
+│   ├── utils/
+│   │   ├── formatters/
+│   │   │   ├── currencyFormatter.js
+│   │   │   ├── dateFormatter.js
+│   │   │   ├── numberFormatter.js
+│   │   │   ├── phoneFormatter.js
+│   │   │   ├── accountFormatter.js
+│   │   │   └── index.js
+│   │   ├── validators/
+│   │   │   ├── emailValidator.js
+│   │   │   ├── phoneValidator.js
+│   │   │   ├── passwordValidator.js
+│   │   │   ├── accountValidator.js
+│   │   │   ├── cardValidator.js
+│   │   │   ├── ibanValidator.js
+│   │   │   ├── swiftValidator.js
+│   │   │   └── index.js
+│   │   ├── helpers/
+│   │   │   ├── arrayHelpers.js
+│   │   │   ├── objectHelpers.js
+│   │   │   ├── stringHelpers.js
+│   │   │   ├── dateHelpers.js
+│   │   │   ├── mathHelpers.js
+│   │   │   ├── fileHelpers.js
+│   │   │   ├── urlHelpers.js
+│   │   │   └── index.js
+│   │   ├── constants/
+│   │   │   └── regex.js
+│   │   ├── errorHandler.js
+│   │   ├── logger.js
+│   │   ├── deviceDetector.js
+│   │   ├── browserDetector.js
+│   │   ├── performanceMonitor.js
+│   │   └── index.js
+│   ├── validations/
+│   │   ├── schemas/
+│   │   │   ├── authSchemas.js
+│   │   │   ├── userSchemas.js
+│   │   │   ├── accountSchemas.js
+│   │   │   ├── transactionSchemas.js
+│   │   │   ├── transferSchemas.js
+│   │   │   ├── cardSchemas.js
+│   │   │   ├── loanSchemas.js
+│   │   │   └── index.js
+│   │   ├── rules/
+│   │   │   ├── commonRules.js
+│   │   │   ├── bankingRules.js
+│   │   │   └── index.js
+│   │   └── index.js
+│   ├── i18n/
+│   │   ├── index.js
+│   │   ├── config.js
+│   │   └── locales/
+│   │       ├── en/
+│   │       │   ├── common.json
+│   │       │   ├── auth.json
+│   │       │   ├── dashboard.json
+│   │       │   ├── accounts.json
+│   │       │   ├── transactions.json
+│   │       │   ├── transfers.json
+│   │       │   ├── cards.json
+│   │       │   ├── loans.json
+│   │       │   ├── settings.json
+│   │       │   ├── errors.json
+│   │       │   └── validation.json
+│   │       ├── es/
+│   │       ├── fr/
+│   │       ├── de/
+│   │       └── ar/
+│   └── main.jsx
+├── tests/
+│   ├── __mocks__/
+│   │   ├── fileMock.js
+│   │   ├── styleMock.js
+│   │   └── apiMocks.js
+│   ├── setup/
+│   │   ├── setupTests.js
+│   │   └── testUtils.jsx
+│   ├── unit/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── utils/
+│   │   └── services/
+│   ├── integration/
+│   │   ├── auth/
+│   │   ├── accounts/
+│   │   └── transactions/
+│   └── e2e/
+│       ├── auth.spec.js
+│       ├── dashboard.spec.js
+│       ├── transfer.spec.js
+│       └── payment.spec.js
+├── .env
+├── .env.development
+├── .env.production
+├── .env.staging
+├── .eslintrc.cjs
+├── .prettierrc
+├── .gitignore
+├── index.html
+├── jsconfig.json
+├── package.json
+├── postcss.config.js
+├── tailwind.config.js
+├── vite.config.js
+└── vitest.config.js
+```
+
+---
+
+## 📁 SERVER STRUCTURE
+
+```
+server/
+├── src/
+│   ├── api/
+│   │   ├── v1/
+│   │   │   ├── index.js
+│   │   │   ├── auth/
+│   │   │   │   ├── auth.controller.js
+│   │   │   │   ├── auth.service.js
+│   │   │   │   ├── auth.routes.js
+│   │   │   │   ├── auth.validation.js
+│   │   │   │   ├── auth.middleware.js
+│   │   │   │   └── index.js
+│   │   │   ├── users/
+│   │   │   │   ├── user.controller.js
+│   │   │   │   ├── user.service.js
+│   │   │   │   ├── user.routes.js
+│   │   │   │   ├── user.validation.js
+│   │   │   │   ├── user.model.js
+│   │   │   │   ├── user.dto.js
+│   │   │   │   └── index.js
+│   │   │   ├── accounts/
+│   │   │   │   ├── account.controller.js
+│   │   │   │   ├── account.service.js
+│   │   │   │   ├── account.routes.js
+│   │   │   │   ├── account.validation.js
+│   │   │   │   ├── account.model.js
+│   │   │   │   ├── account.dto.js
+│   │   │   │   └── index.js
+│   │   │   ├── transactions/
+│   │   │   │   ├── transaction.controller.js
+│   │   │   │   ├── transaction.service.js
+│   │   │   │   ├── transaction.routes.js
+│   │   │   │   ├── transaction.validation.js
+│   │   │   │   ├── transaction.model.js
+│   │   │   │   ├── transaction.dto.js
+│   │   │   │   └── index.js
+│   │   │   ├── transfers/
+│   │   │   │   ├── transfer.controller.js
+│   │   │   │   ├── transfer.service.js
+│   │   │   │   ├── transfer.routes.js
+│   │   │   │   ├── transfer.validation.js
+│   │   │   │   ├── transfer.model.js
+│   │   │   │   └── index.js
+│   │   │   ├── payments/
+│   │   │   │   ├── payment.controller.js
+│   │   │   │   ├── payment.service.js
+│   │   │   │   ├── payment.routes.js
+│   │   │   │   ├── payment.validation.js
+│   │   │   │   ├── payment.model.js
+│   │   │   │   └── index.js
+│   │   │   ├── cards/
+│   │   │   │   ├── card.controller.js
+│   │   │   │   ├── card.service.js
+│   │   │   │   ├── card.routes.js
+│   │   │   │   ├── card.validation.js
+│   │   │   │   ├── card.model.js
+│   │   │   │   └── index.js
+│   │   │   ├── loans/
+│   │   │   │   ├── loan.controller.js
+│   │   │   │   ├── loan.service.js
+│   │   │   │   ├── loan.routes.js
+│   │   │   │   ├── loan.validation.js
+│   │   │   │   ├── loan.model.js
+│   │   │   │   ├── loanApplication.model.js
+│   │   │   │   └── index.js
+│   │   │   ├── investments/
+│   │   │   │   ├── investment.controller.js
+│   │   │   │   ├── investment.service.js
+│   │   │   │   ├── investment.routes.js
+│   │   │   │   ├── investment.validation.js
+│   │   │   │   ├── investment.model.js
+│   │   │   │   └── index.js
+│   │   │   ├── beneficiaries/
+│   │   │   │   ├── beneficiary.controller.js
+│   │   │   │   ├── beneficiary.service.js
+│   │   │   │   ├── beneficiary.routes.js
+│   │   │   │   ├── beneficiary.validation.js
+│   │   │   │   ├── beneficiary.model.js
+│   │   │   │   └── index.js
+│   │   │   ├── notifications/
+│   │   │   │   ├── notification.controller.js
+│   │   │   │   ├── notification.service.js
+│   │   │   │   ├── notification.routes.js
+│   │   │   │   ├── notification.model.js
+│   │   │   │   └── index.js
+│   │   │   ├── kyc/
+│   │   │   │   ├── kyc.controller.js
+│   │   │   │   ├── kyc.service.js
+│   │   │   │   ├── kyc.routes.js
+│   │   │   │   ├── kyc.validation.js
+│   │   │   │   ├── kyc.model.js
+│   │   │   │   └── index.js
+│   │   │   ├── reports/
+│   │   │   │   ├── report.controller.js
+│   │   │   │   ├── report.service.js
+│   │   │   │   ├── report.routes.js
+│   │   │   │   └── index.js
+│   │   │   ├── analytics/
+│   │   │   │   ├── analytics.controller.js
+│   │   │   │   ├── analytics.service.js
+│   │   │   │   ├── analytics.routes.js
+│   │   │   │   └── index.js
+│   │   │   └── support/
+│   │   │       ├── support.controller.js
+│   │   │       ├── support.service.js
+│   │   │       ├── support.routes.js
+│   │   │       ├── ticket.model.js
+│   │   │       └── index.js
+│   │   ├── v2/
+│   │   │   └── [future API version]
+│   │   └── webhooks/
+│   │       ├── stripe.webhook.js
+│   │       ├── plaid.webhook.js
+│   │       └── index.js
+│   ├── config/
+│   │   ├── index.js
+│   │   ├── app.config.js
+│   │   ├── database.config.js
+│   │   ├── redis.config.js
+│   │   ├── jwt.config.js
+│   │   ├── cors.config.js
+│   │   ├── mail.config.js
+│   │   ├── sms.config.js
+│   │   ├── storage.config.js
+│   │   ├── queue.config.js
+│   │   ├── logger.config.js
+│   │   ├── security.config.js
+│   │   ├── swagger.config.js
+│   │   └── rateLimiter.config.js
+│   ├── constants/
+│   │   ├── index.js
+│   │   ├── app.constants.js
+│   │   ├── http.constants.js
+│   │   ├── error.constants.js
+│   │   ├── transaction.constants.js
+│   │   ├── account.constants.js
+│   │   ├── notification.constants.js
+│   │   └── event.constants.js
+│   ├── core/
+│   │   ├── Application.js
+│   │   ├── Router.js
+│   │   ├── Controller.js
+│   │   ├── Service.js
+│   │   ├── Repository.js
+│   │   ├── Middleware.js
+│   │   ├── Validator.js
+│   │   ├── Exception.js
+│   │   └── index.js
+│   ├── database/
+│   │   ├── index.js
+│   │   ├── connection.js
+│   │   ├── migrations/
+│   │   │   ├── 20240101000000_create_users_table.js
+│   │   │   ├── 20240101000001_create_accounts_table.js
+│   │   │   ├── 20240101000002_create_transactions_table.js
+│   │   │   ├── 20240101000003_create_cards_table.js
+│   │   │   ├── 20240101000004_create_loans_table.js
+│   │   │   ├── 20240101000005_create_beneficiaries_table.js
+│   │   │   ├── 20240101000006_create_notifications_table.js
+│   │   │   ├── 20240101000007_create_audit_logs_table.js
+│   │   │   └── index.js
+│   │   ├── seeders/
+│   │   │   ├── userSeeder.js
+│   │   │   ├── accountSeeder.js
+│   │   │   ├── transactionSeeder.js
+│   │   │   └── index.js
+│   │   ├── models/
+│   │   │   ├── index.js
+│   │   │   ├── User.model.js
+│   │   │   ├── Account.model.js
+│   │   │   ├── Transaction.model.js
+│   │   │   ├── Transfer.model.js
+│   │   │   ├── Card.model.js
+│   │   │   ├── Loan.model.js
+│   │   │   ├── LoanApplication.model.js
+│   │   │   ├── Investment.model.js
+│   │   │   ├── Beneficiary.model.js
+│   │   │   ├── Notification.model.js
+│   │   │   ├── KYCDocument.model.js
+│   │   │   ├── AuditLog.model.js
+│   │   │   ├── Session.model.js
+│   │   │   ├── OTP.model.js
+│   │   │   ├── RefreshToken.model.js
+│   │   │   └── Ticket.model.js
+│   │   └── repositories/
+│   │       ├── base.repository.js
+│   │       ├── user.repository.js
+│   │       ├── account.repository.js
+│   │       ├── transaction.repository.js
+│   │       ├── card.repository.js
+│   │       ├── loan.repository.js
+│   │       └── index.js
+│   ├── dto/
+│   │   ├── auth/
+│   │   │   ├── login.dto.js
+│   │   │   ├── register.dto.js
+│   │   │   └── index.js
+│   │   ├── user/
+│   │   │   ├── createUser.dto.js
+│   │   │   ├── updateUser.dto.js
+│   │   │   └── index.js
+│   │   ├── account/
+│   │   │   ├── createAccount.dto.js
+│   │   │   └── index.js
+│   │   ├── transaction/
+│   │   │   ├── createTransaction.dto.js
+│   │   │   └── index.js
+│   │   └── index.js
+│   ├── events/
+│   │   ├── index.js
+│   │   ├── eventEmitter.js
+│   │   ├── handlers/
+│   │   │   ├── auth.handler.js
+│   │   │   ├── transaction.handler.js
+│   │   │   ├── notification.handler.js
+│   │   │   └── index.js
+│   │   └── listeners/
+│   │       ├── emailListener.js
+│   │       ├── smsListener.js
+│   │       ├── pushListener.js
+│   │       ├── auditListener.js
+│   │       └── index.js
+│   ├── exceptions/
+│   │   ├── index.js
+│   │   ├── AppException.js
+│   │   ├── AuthenticationException.js
+│   │   ├── AuthorizationException.js
+│   │   ├── ValidationException.js
+│   │   ├── NotFoundException.js
+│   │   ├── ConflictException.js
+│   │   ├── BadRequestException.js
+│   │   ├── InternalServerException.js
+│   │   ├── RateLimitException.js
+│   │   ├── PaymentException.js
+│   │   ├── InsufficientFundsException.js
+│   │   └── TransactionException.js
+│   ├── integrations/
+│   │   ├── payment/
+│   │   │   ├── stripe/
+│   │   │   │   ├── stripeClient.js
+│   │   │   │   ├── stripeService.js
+│   │   │   │   └── index.js
+│   │   │   ├── paypal/
+│   │   │   │   ├── paypalClient.js
+│   │   │   │   ├── paypalService.js
+│   │   │   │   └── index.js
+│   │   │   └── razorpay/
+│   │   │       ├── razorpayClient.js
+│   │   │       ├── razorpayService.js
+│   │   │       └── index.js
+│   │   ├── banking/
+│   │   │   ├── plaid/
+│   │   │   │   ├── plaidClient.js
+│   │   │   │   ├── plaidService.js
+│   │   │   │   └── index.js
+│   │   │   ├── swift/
+│   │   │   │   ├── swiftClient.js
+│   │   │   │   └── index.js
+│   │   │   └── ach/
+│   │   │       ├── achClient.js
+│   │   │       └── index.js
+│   │   ├── verification/
+│   │   │   ├── jumio/
+│   │   │   ├── onfido/
+│   │   │   └── veriff/
+│   │   ├── communication/
+│   │   │   ├── sendgrid/
+│   │   │   │   ├── sendgridClient.js
+│   │   │   │   ├── emailService.js
+│   │   │   │   └── index.js
+│   │   │   ├── twilio/
+│   │   │   │   ├── twilioClient.js
+│   │   │   │   ├── smsService.js
+│   │   │   │   └── index.js
+│   │   │   └── firebase/
+│   │   │       ├── firebaseClient.js
+│   │   │       ├── pushService.js
+│   │   │       └── index.js
+│   │   ├── storage/
+│   │   │   ├── aws-s3/
+│   │   │   │   ├── s3Client.js
+│   │   │   │   ├── s3Service.js
+│   │   │   │   └── index.js
+│   │   │   └── cloudinary/
+│   │   │       ├── cloudinaryClient.js
+│   │   │       └── index.js
+│   │   ├── analytics/
+│   │   │   ├── mixpanel/
+│   │   │   ├── segment/
+│   │   │   └── amplitude/
+│   │   └── fraud/
+│   │       ├── sift/
+│   │       ├── maxmind/
+│   │       └── index.js
+│   ├── jobs/
+│   │   ├── index.js
+│   │   ├── queues/
+│   │   │   ├── emailQueue.js
+│   │   │   ├── smsQueue.js
+│   │   │   ├── pushNotificationQueue.js
+│   │   │   ├── transactionQueue.js
+│   │   │   ├── reportQueue.js
+│   │   │   └── index.js
+│   │   ├── workers/
+│   │   │   ├── emailWorker.js
+│   │   │   ├── smsWorker.js
+│   │   │   ├── pushNotificationWorker.js
+│   │   │   ├── transactionWorker.js
+│   │   │   ├── reportWorker.js
+│   │   │   ├── scheduledPaymentWorker.js
+│   │   │   └── index.js
+│   │   ├── schedulers/
+│   │   │   ├── dailyReportScheduler.js
+│   │   │   ├── recurringPaymentScheduler.js
+│   │   │   ├── sessionCleanupScheduler.js
+│   │   │   ├── interestCalculationScheduler.js
+│   │   │   └── index.js
+│   │   └── processors/
+│   │       ├── emailProcessor.js
+│   │       ├── transactionProcessor.js
+│   │       └── index.js
+│   ├── loaders/
+│   │   ├── index.js
+│   │   ├── express.loader.js
+│   │   ├── database.loader.js
+│   │   ├── redis.loader.js
+│   │   ├── routes.loader.js
+│   │   ├── middleware.loader.js
+│   │   ├── swagger.loader.js
+│   │   ├── socket.loader.js
+│   │   ├── jobs.loader.js
+│   │   └── events.loader.js
+│   ├── middleware/
+│   │   ├── index.js
+│   │   ├── auth/
+│   │   │   ├── authenticate.js
+│   │   │   ├── authorize.js
+│   │   │   ├── verifyToken.js
+│   │   │   ├── refreshToken.js
+│   │   │   ├── apiKeyAuth.js
+│   │   │   └── index.js
+│   │   ├── security/
+│   │   │   ├── helmet.js
+│   │   │   ├── cors.js
+│   │   │   ├── rateLimit.js
+│   │   │   ├── xss.js
+│   │   │   ├── hpp.js
+│   │   │   ├── mongoSanitize.js
+│   │   │   ├── contentSecurityPolicy.js
+│   │   │   ├── ipWhitelist.js
+│   │   │   ├── fraudDetection.js
+│   │   │   └── index.js
+│   │   ├── validation/
+│   │   │   ├── validateRequest.js
+│   │   │   ├── validateBody.js
+│   │   │   ├── validateQuery.js
+│   │   │   ├── validateParams.js
+│   │   │   └── index.js
+│   │   ├── error/
+│   │   │   ├── errorHandler.js
+│   │   │   ├── notFoundHandler.js
+│   │   │   ├── asyncHandler.js
+│   │   │   └── index.js
+│   │   ├── logging/
+│   │   │   ├── requestLogger.js
+│   │   │   ├── responseLogger.js
+│   │   │   ├── auditLogger.js
+│   │   │   └── index.js
+│   │   ├── upload/
+│   │   │   ├── fileUpload.js
+│   │   │   ├── imageUpload.js
+│   │   │   ├── documentUpload.js
+│   │   │   └── index.js
+│   │   ├── compression.js
+│   │   ├── requestId.js
+│   │   ├── responseTime.js
+│   │   ├── pagination.js
+│   │   ├── sorting.js
+│   │   ├── filtering.js
+│   │   └── cache.js
+│   ├── services/
+│   │   ├── index.js
+│   │   ├── auth.service.js
+│   │   ├── user.service.js
+│   │   ├── account.service.js
+│   │   ├── transaction.service.js
+│   │   ├── transfer.service.js
+│   │   ├── payment.service.js
+│   │   ├── card.service.js
+│   │   ├── loan.service.js
+│   │   ├── investment.service.js
+│   │   ├── notification.service.js
+│   │   ├── email.service.js
+│   │   ├── sms.service.js
+│   │   ├── push.service.js
+│   │   ├── otp.service.js
+│   │   ├── kyc.service.js
+│   │   ├── report.service.js
+│   │   ├── analytics.service.js
+│   │   ├── audit.service.js
+│   │   ├── cache.service.js
+│   │   ├── pdf.service.js
+│   │   ├── csv.service.js
+│   │   ├── encryption.service.js
+│   │   ├── token.service.js
+│   │   └── fraud.service.js
+│   ├── socket/
+│   │   ├── index.js
+│   │   ├── socketServer.js
+│   │   ├── handlers/
+│   │   │   ├── connectionHandler.js
+│   │   │   ├── notificationHandler.js
+│   │   │   ├── transactionHandler.js
+│   │   │   ├── chatHandler.js
+│   │   │   └── index.js
+│   │   ├── events/
+│   │   │   ├── socketEvents.js
+│   │   │   └── index.js
+│   │   └── middleware/
+│   │       ├── socketAuth.js
+│   │       └── index.js
+│   ├── templates/
+│   │   ├── emails/
+│   │   │   ├── layouts/
+│   │   │   │   └── base.hbs
+│   │   │   ├── welcome.hbs
+│   │   │   ├── verify-email.hbs
+│   │   │   ├── reset-password.hbs
+│   │   │   ├── transaction-alert.hbs
+│   │   │   ├── transfer-confirmation.hbs
+│   │   │   ├── login-alert.hbs
+│   │   │   ├── monthly-statement.hbs
+│   │   │   ├── card-blocked.hbs
+│   │   │   ├── loan-approved.hbs
+│   │   │   └── promotional.hbs
+│   │   ├── sms/
+│   │   │   ├── otp.template.js
+│   │   │   ├── transaction-alert.template.js
+│   │   │   └── login-alert.template.js
+│   │   └── pdf/
+│   │       ├── statement.template.js
+│   │       ├── receipt.template.js
+│   │       └── report.template.js
+│   ├── types/
+│   │   ├── index.d.ts
+│   │   ├── express.d.ts
+│   │   └── custom.d.ts
+│   ├── utils/
+│   │   ├── index.js
+│   │   ├── helpers/
+│   │   │   ├── arrayHelper.js
+│   │   │   ├── objectHelper.js
+│   │   │   ├── stringHelper.js
+│   │   │   ├── dateHelper.js
+│   │   │   ├── mathHelper.js
+│   │   │   ├── cryptoHelper.js
+│   │   │   ├── fileHelper.js
+│   │   │   └── index.js
+│   │   ├── formatters/
+│   │   │   ├── currencyFormatter.js
+│   │   │   ├── dateFormatter.js
+│   │   │   ├── phoneFormatter.js
+│   │   │   ├── accountFormatter.js
+│   │   │   └── index.js
+│   │   ├── validators/
+│   │   │   ├── emailValidator.js
+│   │   │   ├── phoneValidator.js
+│   │   │   ├── passwordValidator.js
+│   │   │   ├── ibanValidator.js
+│   │   │   ├── swiftValidator.js
+│   │   │   ├── cardValidator.js
+│   │   │   └── index.js
+│   │   ├── generators/
+│   │   │   ├── accountNumberGenerator.js
+│   │   │   ├── transactionIdGenerator.js
+│   │   │   ├── referenceNumberGenerator.js
+│   │   │   ├── otpGenerator.js
+│   │   │   ├── tokenGenerator.js
+│   │   │   └── index.js
+│   │   ├── calculators/
+│   │   │   ├── interestCalculator.js
+│   │   │   ├── emiCalculator.js
+│   │   │   ├── feeCalculator.js
+│   │   │   └── index.js
+│   │   ├── logger.js
+│   │   ├── response.js
+│   │   ├── apiResponse.js
+│   │   ├── pagination.js
+│   │   └── constants.js
+│   ├── validations/
+│   │   ├── index.js
+│   │   ├── common.validation.js
+│   │   ├── auth.validation.js
+│   │   ├── user.validation.js
+│   │   ├── account.validation.js
+│   │   ├── transaction.validation.js
+│   │   ├── transfer.validation.js
+│   │   ├── card.validation.js
+│   │   ├── loan.validation.js
+│   │   └── schemas/
+│   │       ├── authSchemas.js
+│   │       ├── userSchemas.js
+│   │       ├── accountSchemas.js
+│   │       ├── transactionSchemas.js
+│   │       └── index.js
+│   ├── app.js
+│   └── server.js
+├── tests/
+│   ├── __mocks__/
+│   ├── fixtures/
+│   │   ├── users.fixture.js
+│   │   ├── accounts.fixture.js
+│   │   └── transactions.fixture.js
+│   ├── helpers/
+│   │   ├── testHelper.js
+│   │   └── dbHelper.js
+│   ├── unit/
+│   │   ├── services/
+│   │   ├── utils/
+│   │   └── middleware/
+│   ├── integration/
+│   │   ├── auth/
+│   │   ├── accounts/
+│   │   └── transactions/
+│   └── e2e/
+├── logs/
+│   ├── .gitkeep
+│   ├── error/
+│   ├── combined/
+│   └── audit/
+├── storage/
+│   ├── uploads/
+│   ├── temp/
+│   └── exports/
+├── .env
+├── .env.development
+├── .env.production
+├── .env.test
+├── .eslintrc.js
+├── .prettierrc
+├── .gitignore
+├── .dockerignore
+├── Dockerfile
+├── docker-compose.yml
+├── jest.config.js
+├── nodemon.json
+├── package.json
+├── pm2.ecosystem.config.js
+└── README.md
+```
+
+---
+
+## 📄 KEY FILE IMPLEMENTATIONS
+
+### Client: `tailwind.config.js`
+
+```javascript
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          50: '#eff6ff',
+          100: '#dbeafe',
+          200: '#bfdbfe',
+          300: '#93c5fd',
+          400: '#60a5fa',
+          500: '#3b82f6',
+          600: '#2563eb',
+          700: '#1d4ed8',
+          800: '#1e40af',
+          900: '#1e3a8a',
+          950: '#172554',
+        },
+        secondary: {
+          50: '#f8fafc',
+          100: '#f1f5f9',
+          200: '#e2e8f0',
+          300: '#cbd5e1',
+          400: '#94a3b8',
+          500: '#64748b',
+          600: '#475569',
+          700: '#334155',
+          800: '#1e293b',
+          900: '#0f172a',
+          950: '#020617',
+        },
+        success: {
+          50: '#f0fdf4',
+          500: '#22c55e',
+          600: '#16a34a',
+          700: '#15803d',
+        },
+        warning: {
+          50: '#fffbeb',
+          500: '#f59e0b',
+          600: '#d97706',
+          700: '#b45309',
+        },
+        danger: {
+          50: '#fef2f2',
+          500: '#ef4444',
+          600: '#dc2626',
+          700: '#b91c1c',
+        },
+        banking: {
+          gold: '#D4AF37',
+          platinum: '#E5E4E2',
+          silver: '#C0C0C0',
+          bronze: '#CD7F32',
+        },
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        display: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
+      },
+      fontSize: {
+        '2xs': ['0.625rem', { lineHeight: '0.875rem' }],
+      },
+      spacing: {
+        '18': '4.5rem',
+        '88': '22rem',
+        '112': '28rem',
+        '128': '32rem',
+      },
+      borderRadius: {
+        '4xl': '2rem',
+        '5xl': '2.5rem',
+      },
+      boxShadow: {
+        'card': '0 2px 8px -1px rgba(0, 0, 0, 0.08), 0 4px 16px -2px rgba(0, 0, 0, 0.04)',
+        'card-hover': '0 4px 12px -2px rgba(0, 0, 0, 0.12), 0 8px 24px -4px rgba(0, 0, 0, 0.08)',
+        'elevated': '0 8px 32px -8px rgba(0, 0, 0, 0.16)',
+        'banking': '0 4px 24px -4px rgba(59, 130, 246, 0.24)',
+        'glow': '0 0 24px rgba(59, 130, 246, 0.4)',
+      },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+        'card-gradient': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        'gold-gradient': 'linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #D4AF37 100%)',
+        'platinum-gradient': 'linear-gradient(135deg, #E5E4E2 0%, #C0C0C0 50%, #E5E4E2 100%)',
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.3s ease-in-out',
+        'fade-out': 'fadeOut 0.3s ease-in-out',
+        'slide-in': 'slideIn 0.3s ease-out',
+        'slide-out': 'slideOut 0.3s ease-in',
+        'slide-up': 'slideUp 0.3s ease-out',
+        'slide-down': 'slideDown 0.3s ease-out',
+        'scale-in': 'scaleIn 0.2s ease-out',
+        'bounce-in': 'bounceIn 0.5s ease-out',
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'shimmer': 'shimmer 2s infinite linear',
+        'spin-slow': 'spin 3s linear infinite',
+        'float': 'float 3s ease-in-out infinite',
+        'glow': 'glow 2s ease-in-out infinite alternate',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        fadeOut: {
+          '0%': { opacity: '1' },
+          '100%': { opacity: '0' },
+        },
+        slideIn: {
+          '0%': { transform: 'translateX(-100%)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        slideOut: {
+          '0%': { transform: 'translateX(0)', opacity: '1' },
+          '100%': { transform: 'translateX(100%)', opacity: '0' },
+        },
+        slideUp: {
+          '0%': { transform: 'translateY(100%)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        slideDown: {
+          '0%': { transform: 'translateY(-100%)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        scaleIn: {
+          '0%': { transform: 'scale(0.9)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        bounceIn: {
+          '0%': { transform: 'scale(0.3)', opacity: '0' },
+          '50%': { transform: 'scale(1.05)' },
+          '70%': { transform: 'scale(0.9)' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+        glow: {
+          '0%': { boxShadow: '0 0 5px rgba(59, 130, 246, 0.5)' },
+          '100%': { boxShadow: '0 0 20px rgba(59, 130, 246, 0.8)' },
+        },
+      },
+      transitionDuration: {
+        '400': '400ms',
+      },
+      zIndex: {
+        '60': '60',
+        '70': '70',
+        '80': '80',
+        '90': '90',
+        '100': '100',
+      },
+    },
+  },
+  plugins: [
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/aspect-ratio'),
+    require('tailwind-scrollbar')({ nocompatible: true }),
+  ],
+}
+```
+
+---
+
+### Client: `src/components/common/Button/Button.jsx`
+
+```jsx
+import { forwardRef } from 'react';
+import PropTypes from 'prop-types';
+import { cva } from 'class-variance-authority';
+import { Loader2 } from 'lucide-react';
+import { cn } from '@/utils/helpers';
+
+const buttonVariants = cva(
+  // Base styles
+  `inline-flex items-center justify-center gap-2 
+   font-medium transition-all duration-200 
+   focus:outline-none focus:ring-2 focus:ring-offset-2 
+   disabled:opacity-50 disabled:pointer-events-none
+   active:scale-[0.98]`,
+  {
+    variants: {
+      variant: {
+        primary: `
+          bg-primary-600 text-white 
+          hover:bg-primary-700 
+          focus:ring-primary-500
+          shadow-sm hover:shadow-md
+        `,
+        secondary: `
+          bg-secondary-100 text-secondary-900 
+          hover:bg-secondary-200 
+          focus:ring-secondary-500
+          dark:bg-secondary-800 dark:text-secondary-100
+          dark:hover:bg-secondary-700
+        `,
+        outline: `
+          border-2 border-primary-600 text-primary-600 
+          hover:bg-primary-50 
+          focus:ring-primary-500
+          dark:border-primary-400 dark:text-primary-400
+          dark:hover:bg-primary-950
+        `,
+        ghost: `
+          text-secondary-600 
+          hover:bg-secondary-100 hover:text-secondary-900
+          focus:ring-secondary-500
+          dark:text-secondary-400 
+          dark:hover:bg-secondary-800 dark:hover:text-secondary-100
+        `,
+        danger: `
+          bg-danger-600 text-white 
+          hover:bg-danger-700 
+          focus:ring-danger-500
+          shadow-sm hover:shadow-md
+        `,
+        success: `
+          bg-success-600 text-white 
+          hover:bg-success-700 
+          focus:ring-success-500
+          shadow-sm hover:shadow-md
+        `,
+        warning: `
+          bg-warning-500 text-white 
+          hover:bg-warning-600 
+          focus:ring-warning-500
+          shadow-sm hover:shadow-md
+        `,
+        link: `
+          text-primary-600 underline-offset-4 
+          hover:underline hover:text-primary-700
+          focus:ring-0 focus:ring-offset-0
+          p-0 h-auto
+        `,
+        gradient: `
+          bg-gradient-to-r from-primary-600 to-purple-600 
+          text-white 
+          hover:from-primary-700 hover:to-purple-700
+          focus:ring-primary-500
+          shadow-md hover:shadow-lg
+        `,
+      },
+      size: {
+        xs: 'h-7 px-2.5 text-xs rounded',
+        sm: 'h-8 px-3 text-sm rounded-md',
+        md: 'h-10 px-4 text-sm rounded-lg',
+        lg: 'h-12 px-6 text-base rounded-lg',
+        xl: 'h-14 px-8 text-lg rounded-xl',
+        icon: 'h-10 w-10 rounded-lg',
+        'icon-sm': 'h-8 w-8 rounded-md',
+        'icon-lg': 'h-12 w-12 rounded-xl',
+      },
+      fullWidth: {
+        true: 'w-full',
+      },
+    },
+    defaultVariants: {
+      variant: 'primary',
+      size: 'md',
+    },
+  }
+);
+
+const Button = forwardRef(
+  (
+    {
+      className,
+      variant,
+      size,
+      fullWidth,
+      loading = false,
+      disabled = false,
+      leftIcon: LeftIcon,
+      rightIcon: RightIcon,
+      children,
+      ...props
+    },
+    ref
+  ) => {
+    return (
+      <button
+        ref={ref}
+        className={cn(buttonVariants({ variant, size, fullWidth, className }))}
+        disabled={disabled || loading}
+        {...props}
+      >
+        {loading ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          LeftIcon && <LeftIcon className="h-4 w-4" />
+        )}
+        {children}
+        {!loading && RightIcon && <RightIcon className="h-4 w-4" />}
+      </button>
+    );
+  }
+);
+
+Button.displayName = 'Button';
+
+Button.propTypes = {
+  variant: PropTypes.oneOf([
+    'primary',
+    'secondary',
+    'outline',
+    'ghost',
+    'danger',
+    'success',
+    'warning',
+    'link',
+    'gradient',
+  ]),
+  size: PropTypes.oneOf([
+    'xs',
+    'sm',
+    'md',
+    'lg',
+    'xl',
+    'icon',
+    'icon-sm',
+    'icon-lg',
+  ]),
+  fullWidth: PropTypes.bool,
+  loading: PropTypes.bool,
+  disabled: PropTypes.bool,
+  leftIcon: PropTypes.elementType,
+  rightIcon: PropTypes.elementType,
+  className: PropTypes.string,
+  children: PropTypes.node,
+};
+
+export { Button, buttonVariants };
+export default Button;
+```
+
+---
+
+### Client: `src/components/banking/AccountCard/AccountCard.jsx`
+
+```jsx
+import { useState } from 'react';
+import PropTypes from 'prop-types';
+import { 
+  Eye, 
+  EyeOff, 
+  MoreVertical, 
+  ArrowUpRight, 
+  ArrowDownLeft,
+  Copy,
+  ExternalLink,
+  Settings,
+  Download
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/utils/helpers';
+import { formatCurrency, formatAccountNumber } from '@/utils/formatters';
+import { Button } from '@/components/common/Button';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from '@/components/common/Dropdown';
+import { useToast } from '@/hooks/ui/useToast';
+
+const accountTypeStyles = {
+  checking: {
+    gradient: 'from-blue-600 via-blue-700 to-indigo-800',
+    icon: '💳',
+    pattern: 'opacity-10',
+  },
+  savings: {
+    gradient: 'from-emerald-600 via-emerald-700 to-teal-800',
+    icon: '🏦',
+    pattern: 'opacity-10',
+  },
+  investment: {
+    gradient: 'from-purple-600 via-purple-700 to-pink-800',
+    icon: '📈',
+    pattern: 'opacity-10',
+  },
+  credit: {
+    gradient: 'from-amber-500 via-orange-600 to-red-700',
+    icon: '💎',
+    pattern: 'opacity-10',
+  },
+};
+
+const AccountCard = ({
+  account,
+  className,
+  onTransfer,
+  onDeposit,
+  onViewDetails,
+  variant = 'default',
+  showActions = true,
+}) => {
+  const [showBalance, setShowBalance] = useState(true);
+  const { toast } = useToast();
+
+  const {
+    id,
+    accountNumber,
+    accountName,
+    accountType = 'checking',
+    balance,
+    currency = 'USD',
+    lastTransaction,
+    status,
+  } = account;
+
+  const styles = accountTypeStyles[accountType] || accountTypeStyles.checking;
+
+  const handleCopyAccountNumber = async () => {
+    try {
+      await navigator.clipboard.writeText(accountNumber);
+      toast({
+        title: 'Copied!',
+        description: 'Account number copied to clipboard',
+        variant: 'success',
+      });
+    } catch (error) {
+      toast({
+        title: 'Failed to copy',
+        description: 'Please try again',
+        variant: 'error',
+      });
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className={cn(
+        'relative overflow-hidden rounded-2xl p-6',
+        'bg-gradient-to-br shadow-card hover:shadow-card-hover',
+        'transition-all duration-300 cursor-pointer',
+        'group',
+        styles.gradient,
+        className
+      )}
+      onClick={onViewDetails}
+    >
+      {/* Background Pattern */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className={cn(
+          'absolute -right-8 -top-8 h-40 w-40 rounded-full',
+          'bg-white/10 blur-2xl'
+        )} />
+        <div className={cn(
+          'absolute -bottom-8 -left-8 h-32 w-32 rounded-full',
+          'bg-black/10 blur-2xl'
+        )} />
+        {/* Card Pattern */}
+        <svg
+          className="absolute inset-0 h-full w-full opacity-5"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <pattern
+              id={`pattern-${id}`}
+              x="0"
+              y="0"
+              width="40"
+              height="40"
+              patternUnits="userSpaceOnUse"
+            >
+              <circle cx="20" cy="20" r="1" fill="white" />
+            </pattern>
+          </defs>
+          <rect fill={`url(#pattern-${id})`} width="100%" height="100%" />
+        </svg>
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 flex flex-col h-full min-h-[200px]">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-auto">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">{styles.icon}</span>
+            <div>
+              <h3 className="font-semibold text-white text-lg">
+                {accountName}
+              </h3>
+              <p className="text-white/70 text-sm capitalize">
+                {accountType} Account
+              </p>
+            </div>
+          </div>
+
+          {showActions && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="text-white/70 hover:text-white hover:bg-white/10"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={onViewDetails}>
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  View Details
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleCopyAccountNumber}>
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy Account Number
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Download className="mr-2 h-4 w-4" />
+                  Download Statement
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Account Settings
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
+
+        {/* Balance Section */}
+        <div className="my-6">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-white/70 text-sm">Available Balance</span>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowBalance(!showBalance);
+              }}
+              className="text-white/70 hover:text-white transition-colors"
+            >
+              {showBalance ? (
+                <Eye className="h-4 w-4" />
+              ) : (
+                <EyeOff className="h-4 w-4" />
+              )}
+            </button>
+          </div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={showBalance ? 'shown' : 'hidden'}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ duration: 0.2 }}
+              className="text-3xl font-bold text-white tracking-tight"
+            >
+              {showBalance ? (
+                formatCurrency(balance, currency)
+              ) : (
+                <span className="tracking-widest">••••••</span>
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Account Number */}
+        <div className="flex items-center justify-between mt-auto">
+          <div>
+            <p className="text-white/50 text-xs mb-1">Account Number</p>
+            <p className="text-white font-mono text-sm tracking-wider">
+              {formatAccountNumber(accountNumber)}
+            </p>
+          </div>
+
+          {/* Quick Actions */}
+          {showActions && (
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-white bg-white/10 hover:bg-white/20 border-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeposit?.(account);
+                }}
+                leftIcon={ArrowDownLeft}
+              >
+                Deposit
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-white bg-white/10 hover:bg-white/20 border-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onTransfer?.(account);
+                }}
+                leftIcon={ArrowUpRight}
+              >
+                Transfer
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Status Indicator */}
+        {status && (
+          <div className={cn(
+            'absolute top-4 right-4 px-2 py-0.5 rounded-full text-xs font-medium',
+            status === 'active' && 'bg-green-500/20 text-green-300',
+            status === 'frozen' && 'bg-red-500/20 text-red-300',
+            status === 'pending' && 'bg-yellow-500/20 text-yellow-300'
+          )}>
+            {status}
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+};
+
+AccountCard.propTypes = {
+  account: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    accountNumber: PropTypes.string.isRequired,
+    accountName: PropTypes.string.isRequired,
+    accountType: PropTypes.oneOf(['checking', 'savings', 'investment', 'credit']),
+    balance: PropTypes.number.isRequired,
+    currency: PropTypes.string,
+    lastTransaction: PropTypes.object,
+    status: PropTypes.oneOf(['active', 'frozen', 'pending']),
+  }).isRequired,
+  className: PropTypes.string,
+  onTransfer: PropTypes.func,
+  onDeposit: PropTypes.func,
+  onViewDetails: PropTypes.func,
+  variant: PropTypes.oneOf(['default', 'compact', 'minimal']),
+  showActions: PropTypes.bool,
+};
+
+export default AccountCard;
+```
+
+---
+
+### Client: `src/components/cards/VirtualCard/VirtualCard.jsx`
+
+```jsx
+import { useState, useRef } from 'react';
+import PropTypes from 'prop-types';
+import { motion } from 'framer-motion';
+import { 
+  Wifi, 
+  Copy, 
+  Eye, 
+  EyeOff, 
+  Lock, 
+  Snowflake,
+  CreditCard as CardIcon
+} from 'lucide-react';
+import { cn } from '@/utils/helpers';
+import { formatCardNumber, formatExpiryDate } from '@/utils/formatters';
+import { useToast } from '@/hooks/ui/useToast';
+
+const cardVariants = {
+  default: {
+    front: 'bg-gradient-to-br from-slate-800 via-slate-900 to-black',
+    back: 'bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900',
+  },
+  gold: {
+    front: 'bg-gradient-to-br from-yellow-600 via-amber-500 to-yellow-700',
+    back: 'bg-gradient-to-br from-yellow-700 via-amber-600 to-yellow-800',
+  },
+  platinum: {
+    front: 'bg-gradient-to-br from-gray-300 via-gray-400 to-gray-500',
+    back: 'bg-gradient-to-br from-gray-400 via-gray-500 to-gray-600',
+  },
+  gradient: {
+    front: 'bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600',
+    back: 'bg-gradient-to-br from-purple-700 via-pink-700 to-blue-700',
+  },
+  ocean: {
+    front: 'bg-gradient-to-br from-cyan-500 via-blue-600 to-indigo-700',
+    back: 'bg-gradient-to-br from-cyan-600 via-blue-700 to-indigo-800',
+  },
+};
+
+const VirtualCard = ({
+  card,
+  variant = 'default',
+  size = 'default',
+  showControls = true,
+  interactive = true,
+  className,
+}) => {
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const cardRef = useRef(null);
+  const { toast } = useToast();
+
+  const {
+    cardNumber,
+    cardHolder,
+    expiryDate,
+    cvv,
+    cardType = 'visa',
+    isFrozen = false,
+    isLocked = false,
+  } = card;
+
+  const styles = cardVariants[variant] || cardVariants.default;
+
+  const sizeClasses = {
+    small: 'w-64 h-40',
+    default: 'w-80 h-48',
+    large: 'w-96 h-56',
+  };
+
+  const handleCopy = async (text, label) => {
+    try {
+      await navigator.clipboard.writeText(text.replace(/\s/g, ''));
+      toast({
+        title: 'Copied!',
+        description: `${label} copied to clipboard`,
+        variant: 'success',
+      });
+    } catch (error) {
+      toast({
+        title: 'Failed to copy',
+        variant: 'error',
+      });
+    }
+  };
+
+  const handleFlip = () => {
+    if (interactive) {
+      setIsFlipped(!isFlipped);
+    }
+  };
+
+  const CardLogo = () => {
+    switch (cardType.toLowerCase()) {
+      case 'visa':
+        return (
+          <span className="text-xl font-bold italic text-white tracking-wider">
+            VISA
+          </span>
+        );
+      case 'mastercard':
+        return (
+          <div className="flex">
+            <div className="w-8 h-8 rounded-full bg-red-500 -mr-3" />
+            <div className="w-8 h-8 rounded-full bg-yellow-500 opacity-80" />
+          </div>
+        );
+      case 'amex':
+        return (
+          <span className="text-sm font-bold text-white">
+            AMERICAN EXPRESS
+          </span>
+        );
+      default:
+        return <CardIcon className="w-8 h-8 text-white" />;
+    }
+  };
+
+  return (
+    <div
+      ref={cardRef}
+      className={cn(
+        'perspective-1000 cursor-pointer select-none',
+        sizeClasses[size],
+        className
+      )}
+      onClick={handleFlip}
+    >
+      <motion.div
+        className="relative w-full h-full transform-style-3d"
+        animate={{ rotateY: isFlipped ? 180 : 0 }}
+        transition={{ duration: 0.6, type: 'spring', stiffness: 100 }}
+      >
+        {/* Front of Card */}
+        <div
+          className={cn(
+            'absolute inset-0 backface-hidden rounded-2xl p-6',
+            'shadow-elevated overflow-hidden',
+            styles.front,
+            (isFrozen || isLocked) && 'opacity-60'
+          )}
+        >
+          {/* Frosted/Locked Overlay */}
+          {(isFrozen || isLocked) && (
+            <div className="absolute inset-0 bg-white/10 backdrop-blur-sm z-20 flex items-center justify-center">
+              {isFrozen ? (
+                <div className="text-center">
+                  <Snowflake className="w-12 h-12 text-blue-300 mx-auto mb-2" />
+                  <span className="text-white font-medium">Card Frozen</span>
+                </div>
+              ) : (
+                <div className="text-center">
+                  <Lock className="w-12 h-12 text-red-300 mx-auto mb-2" />
+                  <span className="text-white font-medium">Card Locked</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Pattern Overlay */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full blur-3xl transform translate-x-20 -translate-y-20" />
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-white rounded-full blur-3xl transform -translate-x-16 translate-y-16" />
+          </div>
+
+          {/* Card Content */}
+          <div className="relative z-10 h-full flex flex-col">
+            {/* Header */}
+            <div className="flex justify-between items-start">
+              <div className="flex items-center gap-2">
+                <Wifi className="w-6 h-6 text-white/80 rotate-90" />
+                <span className="text-white/60 text-xs font-medium">
+                  Contactless
+                </span>
+              </div>
+              <CardLogo />
+            </div>
+
+            {/* Chip */}
+            <div className="mt-4">
+              <div className="w-12 h-9 bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-500 rounded-md relative overflow-hidden">
+                <div className="absolute inset-1 grid grid-cols-3 gap-0.5">
+                  {[...Array(6)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="bg-yellow-600/30 rounded-sm"
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Card Number */}
+            <div className="mt-auto mb-4">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-xl text-white tracking-widest">
+                  {showDetails
+                    ? formatCardNumber(cardNumber)
+                    : '•••• •••• •••• ' + cardNumber.slice(-4)}
+                </span>
+                {showControls && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCopy(cardNumber, 'Card number');
+                    }}
+                    className="p-1 hover:bg-white/10 rounded transition-colors"
+                  >
+                    <Copy className="w-4 h-4 text-white/60" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex justify-between items-end">
+              <div>
+                <span className="text-white/50 text-xs block mb-1">
+                  Card Holder
+                </span>
+                <span className="text-white font-medium tracking-wide uppercase">
+                  {cardHolder}
+                </span>
+              </div>
+              <div className="text-right">
+                <span className="text-white/50 text-xs block mb-1">
+                  Expires
+                </span>
+                <span className="text-white font-mono">
+                  {showDetails ? expiryDate : '••/••'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Back of Card */}
+        <div
+          className={cn(
+            'absolute inset-0 backface-hidden rounded-2xl',
+            'shadow-elevated overflow-hidden',
+            'transform rotateY-180',
+            styles.back
+          )}
+          style={{ transform: 'rotateY(180deg)' }}
+        >
+          {/* Magnetic Strip */}
+          <div className="w-full h-12 bg-black/80 mt-8" />
+
+          {/* Signature Strip & CVV */}
+          <div className="px-6 mt-6">
+            <div className="flex gap-4 items-stretch">
+              <div className="flex-1 h-10 bg-white/90 rounded flex items-center px-3">
+                <span className="text-gray-400 italic text-sm">
+                  Authorized Signature
+                </span>
+              </div>
+              <div className="w-16 h-10 bg-white rounded flex items-center justify-center">
+                <span className="font-mono text-gray-800 font-bold">
+                  {showDetails ? cvv : '•••'}
+                </span>
+              </div>
+            </div>
+
+            {/* Info Text */}
+            <div className="mt-6 space-y-2">
+              <p className="text-white/50 text-xs">
+                This card is property of SecureBank. If found, please return
+                to any SecureBank branch.
+              </p>
+              <p className="text-white/50 text-xs">
+                24/7 Support: 1-800-SECURE
+              </p>
+            </div>
+          </div>
+
+          {/* Security Hologram */}
+          <div className="absolute bottom-6 right-6">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 via-pink-300 to-blue-400 opacity-50 animate-pulse" />
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Controls */}
+      {showControls && (
+        <div className="flex justify-center gap-4 mt-4">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowDetails(!showDetails);
+            }}
+            className={cn(
+              'flex items-center gap-2 px-4 py-2 rounded-lg',
+              'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
+              'hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors',
+              'text-sm font-medium'
+            )}
+          >
+            {showDetails ? (
+              <>
+                <EyeOff className="w-4 h-4" />
+                Hide Details
+              </>
+            ) : (
+              <>
+                <Eye className="w-4 h-4" />
+                Show Details
+              </>
+            )}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+VirtualCard.propTypes = {
+  card: PropTypes.shape({
+    cardNumber: PropTypes.string.isRequired,
+    cardHolder: PropTypes.string.isRequired,
+    expiryDate: PropTypes.string.isRequired,
+    cvv: PropTypes.string.isRequired,
+    cardType: PropTypes.oneOf(['visa', 'mastercard', 'amex', 'discover']),
+    isFrozen: PropTypes.bool,
+    isLocked: PropTypes.bool,
+  }).isRequired,
+  variant: PropTypes.oneOf(['default', 'gold', 'platinum', 'gradient', 'ocean']),
+  size: PropTypes.oneOf(['small', 'default', 'large']),
+  showControls: PropTypes.bool,
+  interactive: PropTypes.bool,
+  className: PropTypes.string,
+};
+
+export default VirtualCard;
+```
+
+---
+
+### Client: `src/store/slices/authSlice.js`
+
+```javascript
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { authService } from '@/services/api/authService';
+import { tokenService } from '@/services/auth/authTokenService';
+import { STORAGE_KEYS } from '@/constants/storage.constants';
+
+// Initial State
+const initialState = {
+  user: null,
+  token: tokenService.getAccessToken(),
+  refreshToken: tokenService.getRefreshToken(),
+  isAuthenticated: false,
+  isLoading: false,
+  isInitialized: false,
+  error: null,
+  loginAttempts: 0,
+  lastLoginAt: null,
+  mfaRequired: false,
+  mfaVerified: false,
+  sessionExpiresAt: null,
+};
+
+// Async Thunks
+export const login = createAsyncThunk(
+  'auth/login',
+  async (credentials, { rejectWithValue }) => {
+    try {
+      const response = await authService.login(credentials);
+      
+      if (response.data.requiresMfa) {
+        return { requiresMfa: true, tempToken: response.data.tempToken };
+      }
+      
+      tokenService.setTokens(response.data.tokens);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Login failed'
+      );
+    }
+  }
+);
+
+export const verifyMfa = createAsyncThunk(
+  'auth/verifyMfa',
+  async ({ code, tempToken }, { rejectWithValue }) => {
+    try {
+      const response = await authService.verifyMfa(code, tempToken);
+      tokenService.setTokens(response.data.tokens);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'MFA verification failed'
+      );
+    }
+  }
+);
+
+export const register = createAsyncThunk(
+  'auth/register',
+  async (userData, { rejectWithValue }) => {
+    try {
+      const response = await authService.register(userData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Registration failed'
+      );
+    }
+  }
+);
+
+export const logout = createAsyncThunk(
+  'auth/logout',
+  async (_, { rejectWithValue }) => {
+    try {
+      await authService.logout();
+      tokenService.clearTokens();
+      return null;
+    } catch (error) {
+      tokenService.clearTokens();
+      return rejectWithValue(error.response?.data?.message || 'Logout failed');
+    }
+  }
+);
+
+export const refreshAccessToken = createAsyncThunk(
+  'auth/refreshToken',
+  async (_, { rejectWithValue, getState }) => {
+    try {
+      const { refreshToken } = getState().auth;
+      const response = await authService.refreshToken(refreshToken);
+      tokenService.setAccessToken(response.data.accessToken);
+      return response.data;
+    } catch (error) {
+      tokenService.clearTokens();
+      return rejectWithValue('Session expired');
+    }
+  }
+);
+
+export const fetchCurrentUser = createAsyncThunk(
+  'auth/fetchCurrentUser',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await authService.getCurrentUser();
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to fetch user'
+      );
+    }
+  }
+);
+
+export const forgotPassword = createAsyncThunk(
+  'auth/forgotPassword',
+  async (email, { rejectWithValue }) => {
+    try {
+      const response = await authService.forgotPassword(email);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to send reset email'
+      );
+    }
+  }
+);
+
+export const resetPassword = createAsyncThunk(
+  'auth/resetPassword',
+  async ({ token, password }, { rejectWithValue }) => {
+    try {
+      const response = await authService.resetPassword(token, password);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Password reset failed'
+      );
+    }
+  }
+);
+
+// Slice
+const authSlice = createSlice({
+  name: 'auth',
+  initialState,
+  reducers: {
+    setCredentials: (state, action) => {
+      const { user, token, refreshToken } = action.payload;
+      state.user = user;
+      state.token = token;
+      state.refreshToken = refreshToken;
+      state.isAuthenticated = true;
+      state.error = null;
+    },
+    clearCredentials: (state) => {
+      state.user = null;
+      state.token = null;
+      state.refreshToken = null;
+      state.isAuthenticated = false;
+      state.mfaRequired = false;
+      state.mfaVerified = false;
+    },
+    setUser: (state, action) => {
+      state.user = action.payload;
+    },
+    updateUser: (state, action) => {
+      state.user = { ...state.user, ...action.payload };
+    },
+    setInitialized: (state, action) => {
+      state.isInitialized = action.payload;
+    },
+    clearError: (state) => {
+      state.error = null;
+    },
+    incrementLoginAttempts: (state) => {
+      state.loginAttempts += 1;
+    },
+    resetLoginAttempts: (state) => {
+      state.loginAttempts = 0;
+    },
+    setSessionExpiry: (state, action) => {
+      state.sessionExpiresAt = action.payload;
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      // Login
+      .addCase(login.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(login.fulfilled, (state, action) => {
+        state.isLoading = false;
+        if (action.payload.requiresMfa) {
+          state.mfaRequired = true;
+        } else {
+          state.user = action.payload.user;
+          state.token = action.payload.tokens.accessToken;
+          state.refreshToken = action.payload.tokens.refreshToken;
+          state.isAuthenticated = true;
+          state.lastLoginAt = new Date().toISOString();
+          state.loginAttempts = 0;
+        }
+      })
+      .addCase(login.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+        state.loginAttempts += 1;
+      })
+      // Verify MFA
+      .addCase(verifyMfa.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(verifyMfa.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.user;
+        state.token = action.payload.tokens.accessToken;
+        state.refreshToken = action.payload.tokens.refreshToken;
+        state.isAuthenticated = true;
+        state.mfaRequired = false;
+        state.mfaVerified = true;
+        state.lastLoginAt = new Date().toISOString();
+        state.loginAttempts = 0;
+      })
+      .addCase(verifyMfa.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      // Register
+      .addCase(register.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(register.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(register.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      // Logout
+      .addCase(logout.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(logout.fulfilled, (state) => {
+        return { ...initialState, isInitialized: true };
+      })
+      .addCase(logout.rejected, (state) => {
+        return { ...initialState, isInitialized: true };
+      })
+      // Refresh Token
+      .addCase(refreshAccessToken.fulfilled, (state, action) => {
+        state.token = action.payload.accessToken;
+      })
+      .addCase(refreshAccessToken.rejected, (state) => {
+        return { ...initialState, isInitialized: true };
+      })
+      // Fetch Current User
+      .addCase(fetchCurrentUser.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(fetchCurrentUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload;
+        state.isAuthenticated = true;
+        state.isInitialized = true;
+      })
+      .addCase(fetchCurrentUser.rejected, (state) => {
+        state.isLoading = false;
+        state.isInitialized = true;
+      });
+  },
+});
+
+// Actions
+export const {
+  setCredentials,
+  clearCredentials,
+  setUser,
+  updateUser,
+  setInitialized,
+  clearError,
+  incrementLoginAttempts,
+  resetLoginAttempts,
+  setSessionExpiry,
+} = authSlice.actions;
+
+// Selectors
+export const selectAuth = (state) => state.auth;
+export const selectUser = (state) => state.auth.user;
+export const selectIsAuthenticated = (state) => state.auth.isAuthenticated;
+export const selectIsLoading = (state) => state.auth.isLoading;
+export const selectAuthError = (state) => state.auth.error;
+export const selectIsInitialized = (state) => state.auth.isInitialized;
+export const selectMfaRequired = (state) => state.auth.mfaRequired;
+export const selectLoginAttempts = (state) => state.auth.loginAttempts;
+
+export default authSlice.reducer;
+```
+
+---
+
+### Server: `src/api/v1/auth/auth.controller.js`
+
+```javascript
+const httpStatus = require('http-status');
+const catchAsync = require('@/utils/catchAsync');
+const { authService, tokenService, emailService } = require('@/services');
+const { ApiResponse } = require('@/utils/apiResponse');
+const { AuditService } = require('@/services/audit.service');
+const config = require('@/config');
+
+/**
+ * Register new user
+ * @route POST /api/v1/auth/register
+ */
+const register = catchAsync(async (req, res) => {
+  const { email, password, firstName, lastName, phoneNumber, dateOfBirth } = req.body;
+
+  // Check if user already exists
+  const existingUser = await authService.getUserByEmail(email);
+  if (existingUser) {
+    return ApiResponse.error(res, 'Email already registered', httpStatus.CONFLICT);
+  }
+
+  // Create user
+  const user = await authService.createUser({
+    email,
+    password,
+    firstName,
+    lastName,
+    phoneNumber,
+    dateOfBirth,
+  });
+
+  // Generate email verification token
+  const verificationToken = await tokenService.generateEmailVerificationToken(user.id);
+
+  // Send verification email
+  await emailService.sendVerificationEmail(user.email, verificationToken);
+
+  // Audit log
+  await AuditService.log({
+    action: 'USER_REGISTERED',
+    userId: user.id,
+    details: { email: user.email },
+    ip: req.ip,
+    userAgent: req.get('user-agent'),
+  });
+
+  return ApiResponse.success(
+    res,
+    {
+      user: authService.sanitizeUser(user),
+      message: 'Registration successful. Please verify your email.',
+    },
+    httpStatus.CREATED
+  );
+});
+
+/**
+ * Login user
+ * @route POST /api/v1/auth/login
+ */
+const login = catchAsync(async (req, res) => {
+  const { email, password, deviceInfo } = req.body;
+
+  // Authenticate user
+  const user = await authService.authenticateUser(email, password);
+
+  // Check if MFA is enabled
+  if (user.mfaEnabled) {
+    const tempToken = await tokenService.generateTempToken(user.id);
+    
+    await AuditService.log({
+      action: 'MFA_REQUIRED',
+      userId: user.id,
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+    });
+
+    return ApiResponse.success(res, {
+      requiresMfa: true,
+      tempToken,
+      mfaMethod: user.mfaMethod,
+    });
+  }
+
+  // Generate tokens
+  const tokens = await tokenService.generateAuthTokens(user.id);
+
+  // Create session
+  await authService.createSession({
+    userId: user.id,
+    token: tokens.refreshToken,
+    deviceInfo,
+    ip: req.ip,
+    userAgent: req.get('user-agent'),
+  });
+
+  // Update last login
+  await authService.updateLastLogin(user.id);
+
+  // Audit log
+  await AuditService.log({
+    action: 'USER_LOGIN',
+    userId: user.id,
+    ip: req.ip,
+    userAgent: req.get('user-agent'),
+  });
+
+  // Set refresh token in HTTP-only cookie
+  res.cookie('refreshToken', tokens.refreshToken, {
+    httpOnly: true,
+    secure: config.env === 'production',
+    sameSite: 'strict',
+    maxAge: config.jwt.refreshExpirationDays * 24 * 60 * 60 * 1000,
+  });
+
+  return ApiResponse.success(res, {
+    user: authService.sanitizeUser(user),
+    tokens: {
+      accessToken: tokens.accessToken,
+      expiresIn: config.jwt.accessExpirationMinutes * 60,
+    },
+  });
+});
+
+/**
+ * Verify MFA code
+ * @route POST /api/v1/auth/mfa/verify
+ */
+const verifyMfa = catchAsync(async (req, res) => {
+  const { code, tempToken } = req.body;
+
+  // Verify temp token and get user
+  const userId = await tokenService.verifyTempToken(tempToken);
+  const user = await authService.getUserById(userId);
+
+  // Verify MFA code
+  const isValid = await authService.verifyMfaCode(user.id, code);
+  if (!isValid) {
+    await AuditService.log({
+      action: 'MFA_FAILED',
+      userId: user.id,
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+    });
+    return ApiResponse.error(res, 'Invalid MFA code', httpStatus.UNAUTHORIZED);
+  }
+
+  // Generate tokens
+  const tokens = await tokenService.generateAuthTokens(user.id);
+
+  // Create session
+  await authService.createSession({
+    userId: user.id,
+    token: tokens.refreshToken,
+    ip: req.ip,
+    userAgent: req.get('user-agent'),
+  });
+
+  // Audit log
+  await AuditService.log({
+    action: 'MFA_VERIFIED',
+    userId: user.id,
+    ip: req.ip,
+    userAgent: req.get('user-agent'),
+  });
+
+  return ApiResponse.success(res, {
+    user: authService.sanitizeUser(user),
+    tokens,
+  });
+});
+
+/**
+ * Logout user
+ * @route POST /api/v1/auth/logout
+ */
+const logout = catchAsync(async (req, res) => {
+  const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
+
+  if (refreshToken) {
+    await authService.revokeSession(refreshToken);
+  }
+
+  // Audit log
+  if (req.user) {
+    await AuditService.log({
+      action: 'USER_LOGOUT',
+      userId: req.user.id,
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+    });
+  }
+
+  res.clearCookie('refreshToken');
+
+  return ApiResponse.success(res, { message: 'Logged out successfully' });
+});
+
+/**
+ * Refresh access token
+ * @route POST /api/v1/auth/refresh-token
+ */
+const refreshTokens = catchAsync(async (req, res) => {
+  const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
+
+  if (!refreshToken) {
+    return ApiResponse.error(res, 'Refresh token required', httpStatus.UNAUTHORIZED);
+  }
+
+  const tokens = await authService.refreshAuthTokens(refreshToken);
+
+  res.cookie('refreshToken', tokens.refreshToken, {
+    httpOnly: true,
+    secure: config.env === 'production',
+    sameSite: 'strict',
+    maxAge: config.jwt.refreshExpirationDays * 24 * 60 * 60 * 1000,
+  });
+
+  return ApiResponse.success(res, {
+    accessToken: tokens.accessToken,
+    expiresIn: config.jwt.accessExpirationMinutes * 60,
+  });
+});
+
+/**
+ * Forgot password
+ * @route POST /api/v1/auth/forgot-password
+ */
+const forgotPassword = catchAsync(async (req, res) => {
+  const { email } = req.body;
+
+  const user = await authService.getUserByEmail(email);
+  
+  if (user) {
+    const resetToken = await tokenService.generatePasswordResetToken(user.id);
+    await emailService.sendPasswordResetEmail(user.email, resetToken);
+
+    await AuditService.log({
+      action: 'PASSWORD_RESET_REQUESTED',
+      userId: user.id,
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+    });
+  }
+
+  // Always return success to prevent email enumeration
+  return ApiResponse.success(res, {
+    message: 'If the email exists, a password reset link has been sent.',
+  });
+});
+
+/**
+ * Reset password
+ * @route POST /api/v1/auth/reset-password
+ */
+const resetPassword = catchAsync(async (req, res) => {
+  const { token, password } = req.body;
+
+  const userId = await tokenService.verifyPasswordResetToken(token);
+  await authService.updatePassword(userId, password);
+
+  // Revoke all sessions for security
+  await authService.revokeAllUserSessions(userId);
+
+  await AuditService.log({
+    action: 'PASSWORD_RESET_COMPLETED',
+    userId,
+    ip: req.ip,
+    userAgent: req.get('user-agent'),
+  });
+
+  return ApiResponse.success(res, {
+    message: 'Password reset successful. Please login with your new password.',
+  });
+});
+
+/**
+ * Verify email
+ * @route POST /api/v1/auth/verify-email
+ */
+const verifyEmail = catchAsync(async (req, res) => {
+  const { token } = req.body;
+
+  const userId = await tokenService.verifyEmailVerificationToken(token);
+  await authService.verifyUserEmail(userId);
+
+  await AuditService.log({
+    action: 'EMAIL_VERIFIED',
+    userId,
+    ip: req.ip,
+    userAgent: req.get('user-agent'),
+  });
+
+  return ApiResponse.success(res, {
+    message: 'Email verified successfully.',
+  });
+});
+
+/**
+ * Get current user
+ * @route GET /api/v1/auth/me
+ */
+const getCurrentUser = catchAsync(async (req, res) => {
+  const user = await authService.getUserById(req.user.id);
+
+  return ApiResponse.success(res, {
+    user: authService.sanitizeUser(user),
+  });
+});
+
+/**
+ * Change password
+ * @route POST /api/v1/auth/change-password
+ */
+const changePassword = catchAsync(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  // Verify current password
+  const isValid = await authService.verifyPassword(req.user.id, currentPassword);
+  if (!isValid) {
+    return ApiResponse.error(res, 'Current password is incorrect', httpStatus.BAD_REQUEST);
+  }
+
+  // Update password
+  await authService.updatePassword(req.user.id, newPassword);
+
+  // Optionally revoke other sessions
+  // await authService.revokeOtherSessions(req.user.id, req.sessionId);
+
+  await AuditService.log({
+    action: 'PASSWORD_CHANGED',
+    userId: req.user.id,
+    ip: req.ip,
+    userAgent: req.get('user-agent'),
+  });
+
+  return ApiResponse.success(res, {
+    message: 'Password changed successfully.',
+  });
+});
+
+module.exports = {
+  register,
+  login,
+  verifyMfa,
+  logout,
+  refreshTokens,
+  forgotPassword,
+  resetPassword,
+  verifyEmail,
+  getCurrentUser,
+  changePassword,
+};
+```
+
+---
+
+### Server: `src/middleware/auth/authenticate.js`
+
+```javascript
+const httpStatus = require('http-status');
+const jwt = require('jsonwebtoken');
+const { promisify } = require('util');
+const config = require('@/config');
+const { ApiResponse } = require('@/utils/apiResponse');
+const { User, Session } = require('@/database/models');
+const { redis } = require('@/config/redis.config');
+
+const verifyJwt = promisify(jwt.verify);
+
+/**
+ * Authentication middleware
+ * Verifies JWT token and attaches user to request
+ */
+const authenticate = async (req, res, next) => {
+  try {
+    // Get token from header
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return ApiResponse.error(
+        res,
+        'Access token required',
+        httpStatus.UNAUTHORIZED
+      );
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    // Check if token is blacklisted (logged out)
+    const isBlacklisted = await redis.get(`blacklist:${token}`);
+    if (isBlacklisted) {
+      return ApiResponse.error(
+        res,
+        'Token has been revoked',
+        httpStatus.UNAUTHORIZED
+      );
+    }
+
+    // Verify token
+    let decoded;
+    try {
+      decoded = await verifyJwt(token, config.jwt.accessSecret);
+    } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+        return ApiResponse.error(
+          res,
+          'Token has expired',
+          httpStatus.UNAUTHORIZED
+        );
+      }
+      if (error.name === 'JsonWebTokenError') {
+        return ApiResponse.error(
+          res,
+          'Invalid token',
+          httpStatus.UNAUTHORIZED
+        );
+      }
+      throw error;
+    }
+
+    // Check token type
+    if (decoded.type !== 'access') {
+      return ApiResponse.error(
+        res,
+        'Invalid token type',
+        httpStatus.UNAUTHORIZED
+      );
+    }
+
+    // Get user from cache or database
+    let user = await redis.get(`user:${decoded.sub}`);
+    
+    if (user) {
+      user = JSON.parse(user);
+    } else {
+      user = await User.findByPk(decoded.sub, {
+        attributes: { exclude: ['password'] },
+      });
+
+      if (!user) {
+        return ApiResponse.error(
+          res,
+          'User not found',
+          httpStatus.UNAUTHORIZED
+        );
+      }
+
+      // Cache user for 5 minutes
+      await redis.setex(
+        `user:${decoded.sub}`,
+        300,
+        JSON.stringify(user.toJSON())
+      );
+    }
+
+    // Check if user is active
+    if (user.status !== 'active') {
+      return ApiResponse.error(
+        res,
+        'Account is not active',
+        httpStatus.FORBIDDEN
+      );
+    }
+
+    // Check if email is verified (if required)
+    if (config.auth.requireEmailVerification && !user.emailVerified) {
+      return ApiResponse.error(
+        res,
+        'Please verify your email',
+        httpStatus.FORBIDDEN
+      );
+    }
+
+    // Attach user and token info to request
+    req.user = user;
+    req.tokenInfo = {
+      token,
+      ...decoded,
+    };
+
+    next();
+  } catch (error) {
+    console.error('Authentication error:', error);
+    return ApiResponse.error(
+      res,
+      'Authentication failed',
+      httpStatus.INTERNAL_SERVER_ERROR
+    );
+  }
+};
+
+/**
+ * Optional authentication middleware
+ * Attaches user to request if token is valid, but doesn't require it
+ */
+const optionalAuthenticate = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return next();
+  }
+
+  try {
+    const token = authHeader.split(' ')[1];
+    const decoded = await verifyJwt(token, config.jwt.accessSecret);
+    
+    if (decoded.type === 'access') {
+      const user = await User.findByPk(decoded.sub, {
+        attributes: { exclude: ['password'] },
+      });
+      
+      if (user && user.status === 'active') {
+        req.user = user;
+        req.tokenInfo = { token, ...decoded };
+      }
+    }
+  } catch (error) {
+    // Silently fail for optional auth
+  }
+
+  next();
+};
+
+/**
+ * Refresh token authentication
+ */
+const authenticateRefreshToken = async (req, res, next) => {
+  try {
+    const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
+    
+    if (!refreshToken) {
+      return ApiResponse.error(
+        res,
+        'Refresh token required',
+        httpStatus.UNAUTHORIZED
+      );
+    }
+
+    // Verify token
+    const decoded = await verifyJwt(refreshToken, config.jwt.refreshSecret);
+    
+    if (decoded.type !== 'refresh') {
+      return ApiResponse.error(
+        res,
+        'Invalid token type',
+        httpStatus.UNAUTHORIZED
+      );
+    }
+
+    // Check if session exists and is valid
+    const session = await Session.findOne({
+      where: {
+        token: refreshToken,
+        userId: decoded.sub,
+        isRevoked: false,
+      },
+    });
+
+    if (!session) {
+      return ApiResponse.error(
+        res,
+        'Session not found or revoked',
+        httpStatus.UNAUTHORIZED
+      );
+    }
+
+    // Check if session has expired
+    if (session.expiresAt < new Date()) {
+      await session.update({ isRevoked: true });
+      return ApiResponse.error(
+        res,
+        'Session has expired',
+        httpStatus.UNAUTHORIZED
+      );
+    }
+
+    req.session = session;
+    req.userId = decoded.sub;
+    req.tokenInfo = decoded;
+
+    next();
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return ApiResponse.error(
+        res,
+        'Refresh token has expired',
+        httpStatus.UNAUTHORIZED
+      );
+    }
+    return ApiResponse.error(
+      res,
+      'Invalid refresh token',
+      httpStatus.UNAUTHORIZED
+    );
+  }
+};
+
+module.exports = {
+  authenticate,
+  optionalAuthenticate,
+  authenticateRefreshToken,
+};
+```
+
+---
+
+### Server: `src/database/models/User.model.js`
+
+```javascript
+const { DataTypes, Model } = require('sequelize');
+const bcrypt = require('bcryptjs');
+const { sequelize } = require('@/database/connection');
+const { ACCOUNT_STATUS, USER_ROLES } = require('@/constants');
+
+class User extends Model {
+  // Instance methods
+  async comparePassword(candidatePassword) {
+    return bcrypt.compare(candidatePassword, this.password);
+  }
+
+  toJSON() {
+    const values = { ...this.get() };
+    delete values.password;
+    delete values.mfaSecret;
+    return values;
+  }
+
+  get fullName() {
+    return `${this.firstName} ${this.lastName}`;
+  }
+
+  isAdmin() {
+    return this.role === USER_ROLES.ADMIN;
+  }
+
+  hasPermission(permission) {
+    return this.permissions && this.permissions.includes(permission);
+  }
+}
+
+User.init(
+  {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    email: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+      unique: true,
+      validate: {
+        isEmail: true,
+        notEmpty: true,
+      },
+      set(value) {
+        this.setDataValue('email', value.toLowerCase().trim());
+      },
+    },
+    password: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+      validate: {
+        len: [8, 128],
+      },
+    },
+    firstName: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      validate: {
+        notEmpty: true,
+        len: [1, 100],
+      },
+      set(value) {
+        this.setDataValue('firstName', value.trim());
+      },
+    },
+    lastName: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      validate: {
+        notEmpty: true,
+        len: [1, 100],
+      },
+      set(value) {
+        this.setDataValue('lastName', value.trim());
+      },
+    },
+    phoneNumber: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+      validate: {
+        is: /^\+?[1-9]\d{1,14}$/,
+      },
+    },
+    dateOfBirth: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+      validate: {
+        isDate: true,
+        isBefore: new Date().toISOString().split('T')[0],
+      },
+    },
+    avatar: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+      validate: {
+        isUrl: true,
+      },
+    },
+    role: {
+      type: DataTypes.ENUM(Object.values(USER_ROLES)),
+      defaultValue: USER_ROLES.USER,
+    },
+    permissions: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      defaultValue: [],
+    },
+    status: {
+      type: DataTypes.ENUM(Object.values(ACCOUNT_STATUS)),
+      defaultValue: ACCOUNT_STATUS.PENDING,
+    },
+    emailVerified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    emailVerifiedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    phoneVerified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    phoneVerifiedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    mfaEnabled: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    mfaMethod: {
+      type: DataTypes.ENUM('authenticator', 'sms', 'email'),
+      allowNull: true,
+    },
+    mfaSecret: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    kycStatus: {
+      type: DataTypes.ENUM('pending', 'submitted', 'verified', 'rejected'),
+      defaultValue: 'pending',
+    },
+    kycVerifiedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    riskLevel: {
+      type: DataTypes.ENUM('low', 'medium', 'high'),```javascript
+      defaultValue: 'low',
+    },
+    transactionLimit: {
+      type: DataTypes.DECIMAL(15, 2),
+      defaultValue: 10000.00,
+    },
+    dailyTransactionLimit: {
+      type: DataTypes.DECIMAL(15, 2),
+      defaultValue: 50000.00,
+    },
+    preferredCurrency: {
+      type: DataTypes.STRING(3),
+      defaultValue: 'USD',
+    },
+    timezone: {
+      type: DataTypes.STRING(50),
+      defaultValue: 'UTC',
+    },
+    language: {
+      type: DataTypes.STRING(10),
+      defaultValue: 'en',
+    },
+    notificationPreferences: {
+      type: DataTypes.JSONB,
+      defaultValue: {
+        email: true,
+        push: true,
+        sms: true,
+        marketing: false,
+        transactionAlerts: true,
+        securityAlerts: true,
+        promotions: false,
+      },
+    },
+    address: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      defaultValue: null,
+    },
+    metadata: {
+      type: DataTypes.JSONB,
+      defaultValue: {},
+    },
+    lastLoginAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    lastLoginIp: {
+      type: DataTypes.STRING(45),
+      allowNull: true,
+    },
+    failedLoginAttempts: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+    lockedUntil: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    passwordChangedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    deletedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+  },
+  {
+    sequelize,
+    modelName: 'User',
+    tableName: 'users',
+    timestamps: true,
+    paranoid: true, // Soft delete
+    indexes: [
+      { unique: true, fields: ['email'] },
+      { fields: ['status'] },
+      { fields: ['role'] },
+      { fields: ['phoneNumber'] },
+      { fields: ['createdAt'] },
+    ],
+    hooks: {
+      beforeCreate: async (user) => {
+        if (user.password) {
+          const salt = await bcrypt.genSalt(12);
+          user.password = await bcrypt.hash(user.password, salt);
+        }
+      },
+      beforeUpdate: async (user) => {
+        if (user.changed('password')) {
+          const salt = await bcrypt.genSalt(12);
+          user.password = await bcrypt.hash(user.password, salt);
+          user.passwordChangedAt = new Date();
+        }
+      },
+    },
+  }
+);
+
+// Associations
+User.associate = (models) => {
+  User.hasMany(models.Account, {
+    foreignKey: 'userId',
+    as: 'accounts',
+  });
+
+  User.hasMany(models.Transaction, {
+    foreignKey: 'userId',
+    as: 'transactions',
+  });
+
+  User.hasMany(models.Card, {
+    foreignKey: 'userId',
+    as: 'cards',
+  });
+
+  User.hasMany(models.Beneficiary, {
+    foreignKey: 'userId',
+    as: 'beneficiaries',
+  });
+
+  User.hasMany(models.Notification, {
+    foreignKey: 'userId',
+    as: 'notifications',
+  });
+
+  User.hasMany(models.Session, {
+    foreignKey: 'userId',
+    as: 'sessions',
+  });
+
+  User.hasMany(models.AuditLog, {
+    foreignKey: 'userId',
+    as: 'auditLogs',
+  });
+
+  User.hasMany(models.KYCDocument, {
+    foreignKey: 'userId',
+    as: 'kycDocuments',
+  });
+
+  User.hasMany(models.Loan, {
+    foreignKey: 'userId',
+    as: 'loans',
+  });
+};
+
+module.exports = User;
+```
+
+---
+
+### Server: `src/database/models/Account.model.js`
+
+```javascript
+const { DataTypes, Model } = require('sequelize');
+const { sequelize } = require('@/database/connection');
+const { ACCOUNT_TYPES, ACCOUNT_STATUS, CURRENCIES } = require('@/constants');
+const { generateAccountNumber } = require('@/utils/generators');
+
+class Account extends Model {
+  // Check if account can perform transactions
+  canTransact() {
+    return this.status === 'active' && !this.isFrozen;
+  }
+
+  // Check if account has sufficient balance
+  hasSufficientBalance(amount) {
+    const availableBalance = this.balance - this.holdBalance;
+    return availableBalance >= amount;
+  }
+
+  // Get available balance
+  getAvailableBalance() {
+    return this.balance - this.holdBalance;
+  }
+}
+
+Account.init(
+  {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    userId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'users',
+        key: 'id',
+      },
+    },
+    accountNumber: {
+      type: DataTypes.STRING(20),
+      unique: true,
+      allowNull: false,
+    },
+    accountName: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+    },
+    accountType: {
+      type: DataTypes.ENUM(Object.values(ACCOUNT_TYPES)),
+      allowNull: false,
+      defaultValue: ACCOUNT_TYPES.CHECKING,
+    },
+    currency: {
+      type: DataTypes.STRING(3),
+      allowNull: false,
+      defaultValue: 'USD',
+      validate: {
+        isIn: [Object.values(CURRENCIES)],
+      },
+    },
+    balance: {
+      type: DataTypes.DECIMAL(18, 2),
+      allowNull: false,
+      defaultValue: 0.00,
+      get() {
+        const value = this.getDataValue('balance');
+        return value ? parseFloat(value) : 0;
+      },
+    },
+    availableBalance: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.balance - this.holdBalance;
+      },
+    },
+    holdBalance: {
+      type: DataTypes.DECIMAL(18, 2),
+      defaultValue: 0.00,
+      get() {
+        const value = this.getDataValue('holdBalance');
+        return value ? parseFloat(value) : 0;
+      },
+    },
+    overdraftLimit: {
+      type: DataTypes.DECIMAL(18, 2),
+      defaultValue: 0.00,
+    },
+    interestRate: {
+      type: DataTypes.DECIMAL(5, 4),
+      defaultValue: 0.0000,
+    },
+    minimumBalance: {
+      type: DataTypes.DECIMAL(18, 2),
+      defaultValue: 0.00,
+    },
+    dailyWithdrawalLimit: {
+      type: DataTypes.DECIMAL(18, 2),
+      defaultValue: 5000.00,
+    },
+    dailyTransferLimit: {
+      type: DataTypes.DECIMAL(18, 2),
+      defaultValue: 10000.00,
+    },
+    monthlyTransactionLimit: {
+      type: DataTypes.INTEGER,
+      defaultValue: 100,
+    },
+    status: {
+      type: DataTypes.ENUM(Object.values(ACCOUNT_STATUS)),
+      defaultValue: ACCOUNT_STATUS.ACTIVE,
+    },
+    isFrozen: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    frozenAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    frozenReason: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    isPrimary: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    isDefault: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    branchCode: {
+      type: DataTypes.STRING(10),
+      allowNull: true,
+    },
+    iban: {
+      type: DataTypes.STRING(34),
+      allowNull: true,
+    },
+    swiftCode: {
+      type: DataTypes.STRING(11),
+      allowNull: true,
+    },
+    routingNumber: {
+      type: DataTypes.STRING(9),
+      allowNull: true,
+    },
+    lastTransactionAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    lastInterestCalculatedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    openedAt: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
+    closedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    metadata: {
+      type: DataTypes.JSONB,
+      defaultValue: {},
+    },
+  },
+  {
+    sequelize,
+    modelName: 'Account',
+    tableName: 'accounts',
+    timestamps: true,
+    paranoid: true,
+    indexes: [
+      { unique: true, fields: ['accountNumber'] },
+      { fields: ['userId'] },
+      { fields: ['accountType'] },
+      { fields: ['status'] },
+      { fields: ['currency'] },
+      { fields: ['iban'] },
+    ],
+    hooks: {
+      beforeCreate: async (account) => {
+        if (!account.accountNumber) {
+          account.accountNumber = await generateAccountNumber(account.accountType);
+        }
+      },
+    },
+  }
+);
+
+// Associations
+Account.associate = (models) => {
+  Account.belongsTo(models.User, {
+    foreignKey: 'userId',
+    as: 'user',
+  });
+
+  Account.hasMany(models.Transaction, {
+    foreignKey: 'accountId',
+    as: 'transactions',
+  });
+
+  Account.hasMany(models.Transaction, {
+    foreignKey: 'destinationAccountId',
+    as: 'incomingTransactions',
+  });
+
+  Account.hasMany(models.Card, {
+    foreignKey: 'accountId',
+    as: 'cards',
+  });
+};
+
+module.exports = Account;
+```
+
+---
+
+### Server: `src/database/models/Transaction.model.js`
+
+```javascript
+const { DataTypes, Model } = require('sequelize');
+const { sequelize } = require('@/database/connection');
+const { TRANSACTION_TYPES, TRANSACTION_STATUS } = require('@/constants');
+const { generateTransactionId } = require('@/utils/generators');
+
+class Transaction extends Model {
+  // Check if transaction can be reversed
+  canBeReversed() {
+    const reversibleStatuses = ['completed', 'settled'];
+    const reversibleTypes = ['transfer', 'payment', 'purchase'];
+    const maxReversalDays = 30;
+
+    const daysSinceTransaction = Math.floor(
+      (Date.now() - this.createdAt.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    return (
+      reversibleStatuses.includes(this.status) &&
+      reversibleTypes.includes(this.type) &&
+      !this.isReversed &&
+      daysSinceTransaction <= maxReversalDays
+    );
+  }
+}
+
+Transaction.init(
+  {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    transactionId: {
+      type: DataTypes.STRING(30),
+      unique: true,
+      allowNull: false,
+    },
+    userId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'users',
+        key: 'id',
+      },
+    },
+    accountId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'accounts',
+        key: 'id',
+      },
+    },
+    destinationAccountId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: 'accounts',
+        key: 'id',
+      },
+    },
+    type: {
+      type: DataTypes.ENUM(Object.values(TRANSACTION_TYPES)),
+      allowNull: false,
+    },
+    category: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+    },
+    subCategory: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+    },
+    amount: {
+      type: DataTypes.DECIMAL(18, 2),
+      allowNull: false,
+      get() {
+        const value = this.getDataValue('amount');
+        return value ? parseFloat(value) : 0;
+      },
+    },
+    currency: {
+      type: DataTypes.STRING(3),
+      allowNull: false,
+      defaultValue: 'USD',
+    },
+    convertedAmount: {
+      type: DataTypes.DECIMAL(18, 2),
+      allowNull: true,
+    },
+    convertedCurrency: {
+      type: DataTypes.STRING(3),
+      allowNull: true,
+    },
+    exchangeRate: {
+      type: DataTypes.DECIMAL(18, 8),
+      allowNull: true,
+    },
+    fee: {
+      type: DataTypes.DECIMAL(18, 2),
+      defaultValue: 0.00,
+    },
+    tax: {
+      type: DataTypes.DECIMAL(18, 2),
+      defaultValue: 0.00,
+    },
+    totalAmount: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.amount + this.fee + this.tax;
+      },
+    },
+    balanceBefore: {
+      type: DataTypes.DECIMAL(18, 2),
+      allowNull: true,
+    },
+    balanceAfter: {
+      type: DataTypes.DECIMAL(18, 2),
+      allowNull: true,
+    },
+    direction: {
+      type: DataTypes.ENUM('credit', 'debit'),
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.ENUM(Object.values(TRANSACTION_STATUS)),
+      defaultValue: TRANSACTION_STATUS.PENDING,
+    },
+    description: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+    },
+    memo: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    reference: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+    externalReference: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+    beneficiaryId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: 'beneficiaries',
+        key: 'id',
+      },
+    },
+    beneficiaryName: {
+      type: DataTypes.STRING(200),
+      allowNull: true,
+    },
+    beneficiaryAccount: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+    },
+    beneficiaryBank: {
+      type: DataTypes.STRING(200),
+      allowNull: true,
+    },
+    beneficiaryBankCode: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+    },
+    merchantId: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+    merchantName: {
+      type: DataTypes.STRING(200),
+      allowNull: true,
+    },
+    merchantCategory: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+    },
+    merchantCategoryCode: {
+      type: DataTypes.STRING(10),
+      allowNull: true,
+    },
+    cardId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: 'cards',
+        key: 'id',
+      },
+    },
+    cardLastFour: {
+      type: DataTypes.STRING(4),
+      allowNull: true,
+    },
+    paymentMethod: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+    },
+    channel: {
+      type: DataTypes.ENUM('web', 'mobile', 'atm', 'pos', 'branch', 'api'),
+      allowNull: true,
+    },
+    location: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+    },
+    deviceInfo: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+    },
+    ipAddress: {
+      type: DataTypes.STRING(45),
+      allowNull: true,
+    },
+    isRecurring: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    recurringId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+    },
+    isScheduled: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    scheduledDate: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    processedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    settledAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    failedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    failureReason: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+    },
+    failureCode: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+    },
+    isReversed: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    reversedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    reversalTransactionId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+    },
+    reversalReason: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    isDisputed: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    disputeId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+    },
+    riskScore: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    riskFlags: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      defaultValue: [],
+    },
+    isFlagged: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    flaggedReason: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    notes: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    metadata: {
+      type: DataTypes.JSONB,
+      defaultValue: {},
+    },
+    tags: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      defaultValue: [],
+    },
+  },
+  {
+    sequelize,
+    modelName: 'Transaction',
+    tableName: 'transactions',
+    timestamps: true,
+    indexes: [
+      { unique: true, fields: ['transactionId'] },
+      { fields: ['userId'] },
+      { fields: ['accountId'] },
+      { fields: ['destinationAccountId'] },
+      { fields: ['type'] },
+      { fields: ['status'] },
+      { fields: ['createdAt'] },
+      { fields: ['reference'] },
+      { fields: ['externalReference'] },
+      { fields: ['merchantId'] },
+      { fields: ['cardId'] },
+      { fields: ['category'] },
+      {
+        fields: ['userId', 'createdAt'],
+        name: 'idx_transactions_user_date',
+      },
+      {
+        fields: ['accountId', 'createdAt'],
+        name: 'idx_transactions_account_date',
+      },
+    ],
+    hooks: {
+      beforeCreate: async (transaction) => {
+        if (!transaction.transactionId) {
+          transaction.transactionId = generateTransactionId();
+        }
+      },
+    },
+  }
+);
+
+// Associations
+Transaction.associate = (models) => {
+  Transaction.belongsTo(models.User, {
+    foreignKey: 'userId',
+    as: 'user',
+  });
+
+  Transaction.belongsTo(models.Account, {
+    foreignKey: 'accountId',
+    as: 'account',
+  });
+
+  Transaction.belongsTo(models.Account, {
+    foreignKey: 'destinationAccountId',
+    as: 'destinationAccount',
+  });
+
+  Transaction.belongsTo(models.Beneficiary, {
+    foreignKey: 'beneficiaryId',
+    as: 'beneficiary',
+  });
+
+  Transaction.belongsTo(models.Card, {
+    foreignKey: 'cardId',
+    as: 'card',
+  });
+};
+
+module.exports = Transaction;
+```
+
+---
+
+### Server: `src/services/transaction.service.js`
+
+```javascript
+const { Op, Transaction: SequelizeTransaction } = require('sequelize');
+const { sequelize } = require('@/database/connection');
+const { Transaction, Account, User, Beneficiary } = require('@/database/models');
+const { 
+  TRANSACTION_TYPES, 
+  TRANSACTION_STATUS,
+  ERROR_CODES 
+} = require('@/constants');
+const { 
+  InsufficientFundsException,
+  TransactionException,
+  ValidationException,
+  NotFoundException 
+} = require('@/exceptions');
+const { generateTransactionId, generateReference } = require('@/utils/generators');
+const { calculateFee } = require('@/utils/calculators');
+const { EventEmitter } = require('@/events');
+const { FraudService } = require('./fraud.service');
+const { NotificationService } = require('./notification.service');
+const { AuditService } = require('./audit.service');
+const { redis } = require('@/config/redis.config');
+
+class TransactionService {
+  /**
+   * Create a new transaction
+   */
+  async createTransaction(data, options = {}) {
+    const dbTransaction = await sequelize.transaction({
+      isolationLevel: SequelizeTransaction.ISOLATION_LEVELS.SERIALIZABLE,
+    });
+
+    try {
+      const {
+        userId,
+        accountId,
+        destinationAccountId,
+        type,
+        amount,
+        currency,
+        description,
+        beneficiaryId,
+        metadata = {},
+        channel = 'web',
+        ipAddress,
+        deviceInfo,
+      } = data;
+
+      // Get source account with lock
+      const sourceAccount = await Account.findByPk(accountId, {
+        lock: true,
+        transaction: dbTransaction,
+      });
+
+      if (!sourceAccount) {
+        throw new NotFoundException('Source account not found');
+      }
+
+      if (!sourceAccount.canTransact()) {
+        throw new TransactionException(
+          'Account is not eligible for transactions',
+          ERROR_CODES.ACCOUNT_FROZEN
+        );
+      }
+
+      // Calculate fee
+      const fee = await calculateFee(type, amount, sourceAccount.accountType);
+      const totalAmount = amount + fee;
+
+      // Check sufficient balance for debit transactions
+      const debitTypes = ['transfer', 'withdrawal', 'payment', 'purchase'];
+      if (debitTypes.includes(type)) {
+        if (!sourceAccount.hasSufficientBalance(totalAmount)) {
+          throw new InsufficientFundsException(
+            'Insufficient funds',
+            {
+              available: sourceAccount.getAvailableBalance(),
+              required: totalAmount,
+            }
+          );
+        }
+
+        // Check daily limits
+        const dailyTotal = await this.getDailyTransactionTotal(accountId, type);
+        if (dailyTotal + totalAmount > sourceAccount.dailyTransferLimit) {
+          throw new TransactionException(
+            'Daily transaction limit exceeded',
+            ERROR_CODES.LIMIT_EXCEEDED
+          );
+        }
+      }
+
+      // Fraud check
+      const fraudCheck = await FraudService.analyzeTransaction({
+        userId,
+        accountId,
+        amount,
+        type,
+        ipAddress,
+        deviceInfo,
+      });
+
+      if (fraudCheck.blocked) {
+        throw new TransactionException(
+          'Transaction blocked by security system',
+          ERROR_CODES.FRAUD_DETECTED
+        );
+      }
+
+      // Get beneficiary info if applicable
+      let beneficiaryInfo = {};
+      if (beneficiaryId) {
+        const beneficiary = await Beneficiary.findByPk(beneficiaryId);
+        if (beneficiary) {
+          beneficiaryInfo = {
+            beneficiaryId: beneficiary.id,
+            beneficiaryName: beneficiary.name,
+            beneficiaryAccount: beneficiary.accountNumber,
+            beneficiaryBank: beneficiary.bankName,
+            beneficiaryBankCode: beneficiary.bankCode,
+          };
+        }
+      }
+
+      // Create transaction record
+      const transaction = await Transaction.create(
+        {
+          transactionId: generateTransactionId(),
+          userId,
+          accountId,
+          destinationAccountId,
+          type,
+          amount,
+          currency: currency || sourceAccount.currency,
+          fee,
+          direction: debitTypes.includes(type) ? 'debit' : 'credit',
+          status: TRANSACTION_STATUS.PENDING,
+          description,
+          reference: generateReference(),
+          balanceBefore: sourceAccount.balance,
+          channel,
+          ipAddress,
+          deviceInfo,
+          riskScore: fraudCheck.score,
+          riskFlags: fraudCheck.flags,
+          isFlagged: fraudCheck.flagged,
+          ...beneficiaryInfo,
+          metadata: {
+            ...metadata,
+            fraudCheckId: fraudCheck.id,
+          },
+        },
+        { transaction: dbTransaction }
+      );
+
+      // Update source account balance
+      if (debitTypes.includes(type)) {
+        await sourceAccount.decrement('balance', {
+          by: totalAmount,
+          transaction: dbTransaction,
+        });
+      } else {
+        await sourceAccount.increment('balance', {
+          by: amount,
+          transaction: dbTransaction,
+        });
+      }
+
+      // Update destination account if internal transfer
+      if (destinationAccountId) {
+        const destAccount = await Account.findByPk(destinationAccountId, {
+          lock: true,
+          transaction: dbTransaction,
+        });
+
+        if (destAccount) {
+          await destAccount.increment('balance', {
+            by: amount,
+            transaction: dbTransaction,
+          });
+        }
+      }
+
+      // Get updated balance
+      await sourceAccount.reload({ transaction: dbTransaction });
+
+      // Update transaction with new balance
+      await transaction.update(
+        {
+          balanceAfter: sourceAccount.balance,
+          status: TRANSACTION_STATUS.COMPLETED,
+          processedAt: new Date(),
+        },
+        { transaction: dbTransaction }
+      );
+
+      // Update last transaction time
+      await sourceAccount.update(
+        { lastTransactionAt: new Date() },
+        { transaction: dbTransaction }
+      );
+
+      await dbTransaction.commit();
+
+      // Post-transaction processing (async)
+      this.postTransactionProcessing(transaction, sourceAccount);
+
+      return transaction;
+    } catch (error) {
+      await dbTransaction.rollback();
+      throw error;
+    }
+  }
+
+  /**
+   * Post-transaction processing
+   */
+  async postTransactionProcessing(transaction, account) {
+    try {
+      // Send notification
+      await NotificationService.sendTransactionNotification(
+        transaction.userId,
+        transaction
+      );
+
+      // Audit log
+      await AuditService.log({
+        action: 'TRANSACTION_COMPLETED',
+        userId: transaction.userId,
+        resourceType: 'transaction',
+        resourceId: transaction.id,
+        details: {
+          transactionId: transaction.transactionId,
+          type: transaction.type,
+          amount: transaction.amount,
+          accountId: transaction.accountId,
+        },
+      });
+
+      // Emit event
+      EventEmitter.emit('transaction.completed', transaction);
+
+      // Invalidate cache
+      await this.invalidateCache(transaction.userId, transaction.accountId);
+    } catch (error) {
+      console.error('Post-transaction processing error:', error);
+    }
+  }
+
+  /**
+   * Get transaction by ID
+   */
+  async getTransactionById(id, userId = null) {
+    const where = { id };
+    if (userId) {
+      where.userId = userId;
+    }
+
+    const transaction = await Transaction.findOne({
+      where,
+      include: [
+        {
+          model: Account,
+          as: 'account',
+          attributes: ['id', 'accountNumber', 'accountName', 'accountType'],
+        },
+        {
+          model: Account,
+          as: 'destinationAccount',
+          attributes: ['id', 'accountNumber', 'accountName'],
+        },
+        {
+          model: Beneficiary,
+          as: 'beneficiary',
+          attributes: ['id', 'name', 'accountNumber', 'bankName'],
+        },
+      ],
+    });
+
+    if (!transaction) {
+      throw new NotFoundException('Transaction not found');
+    }
+
+    return transaction;
+  }
+
+  /**
+   * Get transactions with pagination and filters
+   */
+  async getTransactions(userId, filters = {}, pagination = {}) {
+    const {
+      accountId,
+      type,
+      status,
+      direction,
+      category,
+      startDate,
+      endDate,
+      minAmount,
+      maxAmount,
+      search,
+    } = filters;
+
+    const { page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'DESC' } = pagination;
+
+    const where = { userId };
+
+    if (accountId) where.accountId = accountId;
+    if (type) where.type = Array.isArray(type) ? { [Op.in]: type } : type;
+    if (status) where.status = status;
+    if (direction) where.direction = direction;
+    if (category) where.category = category;
+
+    if (startDate || endDate) {
+      where.createdAt = {};
+      if (startDate) where.createdAt[Op.gte] = new Date(startDate);
+      if (endDate) where.createdAt[Op.lte] = new Date(endDate);
+    }
+
+    if (minAmount || maxAmount) {
+      where.amount = {};
+      if (minAmount) where.amount[Op.gte] = minAmount;
+      if (maxAmount) where.amount[Op.lte] = maxAmount;
+    }
+
+    if (search) {
+      where[Op.or] = [
+        { description: { [Op.iLike]: `%${search}%` } },
+        { reference: { [Op.iLike]: `%${search}%` } },
+        { transactionId: { [Op.iLike]: `%${search}%` } },
+        { merchantName: { [Op.iLike]: `%${search}%` } },
+        { beneficiaryName: { [Op.iLike]: `%${search}%` } },
+      ];
+    }
+
+    const { count, rows } = await Transaction.findAndCountAll({
+      where,
+      include: [
+        {
+          model: Account,
+          as: 'account',
+          attributes: ['id', 'accountNumber', 'accountName', 'accountType'],
+        },
+      ],
+      order: [[sortBy, sortOrder]],
+      limit,
+      offset: (page - 1) * limit,
+    });
+
+    return {
+      transactions: rows,
+      pagination: {
+        total: count,
+        page,
+        limit,
+        totalPages: Math.ceil(count / limit),
+        hasMore: page * limit < count,
+      },
+    };
+  }
+
+  /**
+   * Get transaction statistics
+   */
+  async getTransactionStats(userId, accountId = null, period = 'month') {
+    const cacheKey = `stats:${userId}:${accountId || 'all'}:${period}`;
+    
+    // Check cache
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+
+    const startDate = this.getStartDate(period);
+    const where = {
+      userId,
+      status: TRANSACTION_STATUS.COMPLETED,
+      createdAt: { [Op.gte]: startDate },
+    };
+
+    if (accountId) {
+      where.accountId = accountId;
+    }
+
+    // Get totals by direction
+    const [income, expenses] = await Promise.all([
+      Transaction.sum('amount', {
+        where: { ...where, direction: 'credit' },
+      }),
+      Transaction.sum('amount', {
+        where: { ...where, direction: 'debit' },
+      }),
+    ]);
+
+    // Get category breakdown
+    const categoryStats = await Transaction.findAll({
+      attributes: [
+        'category',
+        [sequelize.fn('SUM', sequelize.col('amount')), 'total'],
+        [sequelize.fn('COUNT', sequelize.col('id')), 'count'],
+      ],
+      where: { ...where, direction: 'debit' },
+      group: ['category'],
+      order: [[sequelize.fn('SUM', sequelize.col('amount')), 'DESC']],
+      raw: true,
+    });
+
+    // Get transaction count by type
+    const typeStats = await Transaction.findAll({
+      attributes: [
+        'type',
+        [sequelize.fn('COUNT', sequelize.col('id')), 'count'],
+        [sequelize.fn('SUM', sequelize.col('amount')), 'total'],
+      ],
+      where,
+      group: ['type'],
+      raw: true,
+    });
+
+    const stats = {
+      period,
+      startDate,
+      income: income || 0,
+      expenses: expenses || 0,
+      netChange: (income || 0) - (expenses || 0),
+      categoryBreakdown: categoryStats,
+      typeBreakdown: typeStats,
+    };
+
+    // Cache for 5 minutes
+    await redis.setex(cacheKey, 300, JSON.stringify(stats));
+
+    return stats;
+  }
+
+  /**
+   * Get daily transaction total
+   */
+  async getDailyTransactionTotal(accountId, type) {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const total = await Transaction.sum('amount', {
+      where: {
+        accountId,
+        type,
+        status: TRANSACTION_STATUS.COMPLETED,
+        createdAt: { [Op.gte]: startOfDay },
+      },
+    });
+
+    return total || 0;
+  }
+
+  /**
+   * Reverse a transaction
+   */
+  async reverseTransaction(transactionId, userId, reason) {
+    const dbTransaction = await sequelize.transaction();
+
+    try {
+      const originalTransaction = await Transaction.findOne({
+        where: { id: transactionId, userId },
+        lock: true,
+        transaction: dbTransaction,
+      });
+
+      if (!originalTransaction) {
+        throw new NotFoundException('Transaction not found');
+      }
+
+      if (!originalTransaction.canBeReversed()) {
+        throw new TransactionException(
+          'Transaction cannot be reversed',
+          ERROR_CODES.REVERSAL_NOT_ALLOWED
+        );
+      }
+
+      // Create reversal transaction
+      const reversalTransaction = await Transaction.create(
+        {
+          transactionId: generateTransactionId(),
+          userId,
+          accountId: originalTransaction.accountId,
+          destinationAccountId: originalTransaction.destinationAccountId,
+          type: 'reversal',
+          amount: originalTransaction.amount,
+          currency: originalTransaction.currency,
+          direction: originalTransaction.direction === 'debit' ? 'credit' : 'debit',
+          status: TRANSACTION_STATUS.COMPLETED,
+          description: `Reversal of ${originalTransaction.transactionId}`,
+          reference: generateReference(),
+          reversalReason: reason,
+          metadata: {
+            originalTransactionId: originalTransaction.id,
+          },
+        },
+        { transaction: dbTransaction }
+      );
+
+      // Update account balances
+      const account = await Account.findByPk(originalTransaction.accountId, {
+        lock: true,
+        transaction: dbTransaction,
+      });
+
+      if (originalTransaction.direction === 'debit') {
+        await account.increment('balance', {
+          by: originalTransaction.amount,
+          transaction: dbTransaction,
+        });
+      } else {
+        await account.decrement('balance', {
+          by: originalTransaction.amount,
+          transaction: dbTransaction,
+        });
+      }
+
+      // If there was a destination account, reverse that too
+      if (originalTransaction.destinationAccountId) {
+        const destAccount = await Account.findByPk(
+          originalTransaction.destinationAccountId,
+          { lock: true, transaction: dbTransaction }
+        );
+
+        if (destAccount) {
+          await destAccount.decrement('balance', {
+            by: originalTransaction.amount,
+            transaction: dbTransaction,
+          });
+        }
+      }
+
+      // Mark original transaction as reversed
+      await originalTransaction.update(
+        {
+          isReversed: true,
+          reversedAt: new Date(),
+          reversalTransactionId: reversalTransaction.id,
+          reversalReason: reason,
+        },
+        { transaction: dbTransaction }
+      );
+
+      await dbTransaction.commit();
+
+      // Audit log
+      await AuditService.log({
+        action: 'TRANSACTION_REVERSED',
+        userId,
+        resourceType: 'transaction',
+        resourceId: originalTransaction.id,
+        details: {
+          originalTransactionId: originalTransaction.transactionId,
+          reversalTransactionId: reversalTransaction.transactionId,
+          reason,
+        },
+      });
+
+      return reversalTransaction;
+    } catch (error) {
+      await dbTransaction.rollback();
+      throw error;
+    }
+  }
+
+  /**
+   * Get start date based on period
+   */
+  getStartDate(period) {
+    const now = new Date();
+    switch (period) {
+      case 'day':
+        return new Date(now.setHours(0, 0, 0, 0));
+      case 'week':
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - now.getDay());
+        weekStart.setHours(0, 0, 0, 0);
+        return weekStart;
+      case 'month':
+        return new Date(now.getFullYear(), now.getMonth(), 1);
+      case 'quarter':
+        const quarter = Math.floor(now.getMonth() / 3);
+        return new Date(now.getFullYear(), quarter * 3, 1);
+      case 'year':
+        return new Date(now.getFullYear(), 0, 1);
+      default:
+        return new Date(now.getFullYear(), now.getMonth(), 1);
+    }
+  }
+
+  /**
+   * Invalidate cache
+   */
+  async invalidateCache(userId, accountId) {
+    const patterns = [
+      `stats:${userId}:*`,
+      `transactions:${userId}:*`,
+      `account:${accountId}:*`,
+    ];
+
+    for (const pattern of patterns) {
+      const keys = await redis.keys(pattern);
+      if (keys.length > 0) {
+        await redis.del(keys);
+      }
+    }
+  }
+}
+
+module.exports = new TransactionService();
+```
+
+---
+
+### Client: `src/pages/dashboard/Dashboard/Dashboard.jsx`
+
+```jsx
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { 
+  ArrowUpRight, 
+  ArrowDownLeft, 
+  TrendingUp, 
+  TrendingDown,
+  Plus,
+  Eye,
+  Bell,
+  Settings,
+  CreditCard,
+  Wallet,
+  PiggyBank,
+  BarChart3,
+  Send,
+  QrCode,
+  Receipt,
+  ArrowRightLeft
+} from 'lucide-react';
+import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { AccountCard } from '@/components/banking/AccountCard';
+import { TransactionList } from '@/components/banking/TransactionList';
+import { SpendingChart } from '@/components/banking/SpendingChart';
+import { VirtualCard } from '@/components/cards/VirtualCard';
+import { Button } from '@/components/common/Button';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/common/Card';
+import { Skeleton } from '@/components/common/Skeleton';
+import { Badge } from '@/components/common/Badge';
+
+import { useAccounts } from '@/hooks/banking/useAccounts';
+import { useTransactions } from '@/hooks/banking/useTransactions';
+import { useCards } from '@/hooks/banking/useCards';
+import { selectUser } from '@/store/slices/authSlice';
+import { formatCurrency, formatRelativeTime } from '@/utils/formatters';
+import { cn } from '@/utils/helpers';
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.4,
+      ease: 'easeOut',
+    },
+  },
+};
+
+const QuickActionButton = ({ icon: Icon, label, onClick, variant = 'default' }) => (
+  <motion.button
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+    onClick={onClick}
+    className={cn(
+      'flex flex-col items-center justify-center gap-2 p-4 rounded-xl',
+      'transition-all duration-200',
+      variant === 'primary' 
+        ? 'bg-primary-600 text-white hover:bg-primary-700' 
+        : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750',
+      'border border-gray-200 dark:border-gray-700',
+      'shadow-sm hover:shadow-md'
+    )}
+  >
+    <div className={cn(
+      'w-12 h-12 rounded-full flex items-center justify-center',
+      variant === 'primary' 
+        ? 'bg-white/20' 
+        : 'bg-primary-50 dark:bg-primary-900/30'
+    )}>
+      <Icon className={cn(
+        'w-6 h-6',
+        variant === 'primary' ? 'text-white' : 'text-primary-600 dark:text-primary-400'
+      )} />
+    </div>
+    <span className={cn(
+      'text-sm font-medium',
+      variant === 'primary' ? 'text-white' : 'text-gray-700 dark:text-gray-200'
+    )}>
+      {label}
+    </span>
+  </motion.button>
+);
+
+const StatCard = ({ title, value, change, changeType, icon: Icon }) => (
+  <Card className="relative overflow-hidden">
+    <CardContent className="p-6">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            {title}
+          </p>
+          <h3 className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
+            {value}
+          </h3>
+          {change !== undefined && (
+            <div className="mt-2 flex items-center gap-1">
+              {changeType === 'increase' ? (
+                <TrendingUp className="w-4 h-4 text-green-500" />
+              ) : (
+                <TrendingDown className="w-4 h-4 text-red-500" />
+              )}
+              <span className={cn(
+                'text-sm font-medium',
+                changeType === 'increase' ? 'text-green-500' : 'text-red-500'
+              )}>
+                {change}%
+              </span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                vs last month
+              </span>
+            </div>
+          )}
+        </div>
+        <div className="p-3 rounded-xl bg-primary-50 dark:bg-primary-900/30">
+          <Icon className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+        </div>
+      </div>
+    </CardContent>
+    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary-500 to-purple-500" />
+  </Card>
+);
+
+const Dashboard = () => {
+  const user = useSelector(selectUser);
+  const [selectedPeriod, setSelectedPeriod] = useState('month');
+  
+  const { 
+    accounts, 
+    totalBalance, 
+    isLoading: accountsLoading 
+  } = useAccounts();
+  
+  const { 
+    transactions, 
+    isLoading: transactionsLoading 
+  } = useTransactions({ limit: 5 });
+  
+  const { 
+    cards, 
+    primaryCard, 
+    isLoading: cardsLoading 
+  } = useCards();
+
+  const greeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
+  };
+
+  return (
+    <DashboardLayout>
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="space-y-8"
+      >
+        {/* Header */}
+        <motion.div 
+          variants={itemVariants}
+          className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4"
+        >
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
+              {greeting()}, {user?.firstName}! 👋
+            </h1>
+            <p className="mt-1 text-gray-500 dark:text-gray-400">
+              Here's what's happening with your finances today.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button variant="outline" leftIcon={Bell} size="icon">
+              <span className="sr-only">Notifications</span>
+            </Button>
+            <Button variant="outline" leftIcon={Settings} size="icon">
+              <span className="sr-only">Settings</span>
+            </Button>
+            <Button leftIcon={Plus}>
+              New Transaction
+            </Button>
+          </div>
+        </motion.div>
+
+        {/* Stats Grid */}
+        <motion.div 
+          variants={itemVariants}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+        >
+          <StatCard
+            title="Total Balance"
+            value={formatCurrency(totalBalance || 0)}
+            change={12.5}
+            changeType="increase"
+            icon={Wallet}
+          />
+          <StatCard
+            title="Monthly Income"
+            value={formatCurrency(8450.00)}
+            change={8.2}
+            changeType="increase"
+            icon={ArrowDownLeft}
+          />
+          <StatCard
+            title="Monthly Expenses"
+            value={formatCurrency(3200.00)}
+            change={5.4}
+            changeType="decrease"
+            icon={ArrowUpRight}
+          />
+          <StatCard
+            title="Savings"
+            value={formatCurrency(15000.00)}
+            change={15.8}
+            changeType="increase"
+            icon={PiggyBank}
+          />
+        </motion.div>
+
+        {/* Quick Actions */}
+        <motion.div variants={itemVariants}>
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
+                <QuickActionButton
+                  icon={Send}
+                  label="Send Money"
+                  variant="primary"
+                />
+                <QuickActionButton
+                  icon={ArrowDownLeft}
+                  label="Request"
+                />
+                <QuickActionButton
+                  icon={ArrowRightLeft}
+                  label="Transfer"
+                />
+                <QuickActionButton
+                  icon={Receipt}
+                  label="Pay Bills"
+                />
+                <QuickActionButton
+                  icon={QrCode}
+                  label="QR Pay"
+                />
+                <QuickActionButton
+                  icon={CreditCard}
+                  label="Cards"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Accounts & Transactions */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Accounts */}
+            <motion.div variants={itemVariants}>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Your Accounts
+                </h2>
+                <Link to="/accounts">
+                  <Button variant="ghost" size="sm" rightIcon={Eye}>
+                    View All
+                  </Button>
+                </Link>
+              </div>
+              
+              {accountsLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Skeleton className="h-52 rounded-2xl" />
+                  <Skeleton className="h-52 rounded-2xl" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {accounts?.slice(0, 2).map((account) => (
+                    <AccountCard
+                      key={account.id}
+                      account={account}
+                      onTransfer={() => {}}
+                      onDeposit={() => {}}
+                      onViewDetails={() => {}}
+                    />
+                  ))}
+                </div>
+              )}
+            </motion.div>
+
+            {/* Recent Transactions */}
+            <motion.div variants={itemVariants}>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle>Recent Transactions</CardTitle>
+                  <Link to="/transactions">
+                    <Button variant="ghost" size="sm" rightIcon={Eye}>
+                      View All
+                    </Button>
+                  </Link>
+                </CardHeader>
+                <CardContent>
+                  {transactionsLoading ? (
+                    <div className="space-y-4">
+                      {[...Array(5)].map((_, i) => (
+                        <Skeleton key={i} className="h-16" />
+                      ))}
+                    </div>
+                  ) : (
+                    <TransactionList 
+                      transactions={transactions} 
+                      variant="compact"
+                    />
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Spending Analytics */}
+            <motion.div variants={itemVariants}>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle>Spending Analytics</CardTitle>
+                  <div className="flex gap-2">
+                    {['week', 'month', 'year'].map((period) => (
+                      <button
+                        key={period}
+                        onClick={() => setSelectedPeriod(period)}
+                        className={cn(
+                          'px-3 py-1 text-sm font-medium rounded-lg transition-colors',
+                          selectedPeriod === period
+                            ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300'
+                            : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                        )}
+                      >
+                        {period.charAt(0).toUpperCase() + period.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <SpendingChart period={selectedPeriod} />
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+
+          {/* Right Column - Cards & Insights */}
+          <div className="space-y-8">
+            {/* Primary Card */}
+            <motion.div variants={itemVariants}>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Your Card
+                </h2>
+                <Link to="/cards">
+                  <Button variant="ghost" size="sm">
+                    Manage
+                  </Button>
+                </Link>
+              </div>
+              
+              {cardsLoading ? (
+                <Skeleton className="h-48 rounded-2xl" />
+              ) : primaryCard ? (
+                <VirtualCard 
+                  card={primaryCard}
+                  variant="gradient"
+                  showControls={false}
+                />
+              ) : (
+                <Card className="h-48 flex items-center justify-center">
+                  <div className="text-center">
+                    <CreditCard className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-500 dark:text-gray-400">
+                      No cards yet
+                    </p>
+                    <Button variant="link" className="mt-2">
+                      Apply for a card
+                    </Button>
+                  </div>
+                </Card>
+              )}
+            </motion.div>
+
+            {/* Insights */}
+            <motion.div variants={itemVariants}>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5" />
+                    Insights
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/50">
+                        <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-green-800 dark:text-green-200">
+                          Spending Down 15%
+                        </p>
+                        <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                          Great job! You spent less this month compared to last month.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/50">
+                        <PiggyBank className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-blue-800 dark:text-blue-200">
+                          Savings Goal Progress
+                        </p>
+                        <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
+                          You're 75% towards your vacation fund goal!
+                        </p>
+                        <div className="mt-2 h-2 bg-blue-200 dark:bg-blue-800 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-blue-600 dark:bg-blue-400 rounded-full"
+                            style={{ width: '75%' }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/50">
+                        <Receipt className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-amber-800 dark:text-amber-200">
+                          Upcoming Bills
+                        </p>
+                        <p className="text-sm text-amber-600 dark:text-amber-400 mt-1">
+                          3 bills due in the next 7 days totaling $485.00
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Recent Activity */}
+            <motion.div variants={itemVariants}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Activity</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[
+                      {
+                        title: 'Transfer to John Doe',
+                        time: '2 minutes ago',
+                        amount: '-$250.00',
+                        type: 'debit',
+                      },
+                      {
+                        title: 'Salary Deposit',
+                        time: '1 hour ago',
+                        amount: '+$4,500.00',
+                        type: 'credit',
+                      },
+                      {
+                        title: 'Netflix Subscription',
+                        time: '3 hours ago',
+                        amount: '-$15.99',
+                        type: 'debit',
+                      },
+                    ].map((activity, index) => (
+                      <div 
+                        key={index}
+                        className="flex items-center justify-between py-2"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={cn(
+                            'w-10 h-10 rounded-full flex items-center justify-center',
+                            activity.type === 'credit' 
+                              ? 'bg-green-100 dark:bg-green-900/30' 
+                              : 'bg-red-100 dark:bg-red-900/30'
+                          )}>
+                            {activity.type === 'credit' ? (
+                              <ArrowDownLeft className="w-5 h-5 text-green-600 dark:text-green-400" />
+                            ) : (
+                              <ArrowUpRight className="w-5 h-5 text-red-600 dark:text-red-400" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">
+                              {activity.title}
+                            </p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              {activity.time}
+                            </p>
+                          </div>
+                        </div>
+                        <span className={cn(
+                          'font-semibold',
+                          activity.type === 'credit' 
+                            ? 'text-green-600 dark:text-green-400' 
+                            : 'text-red-600 dark:text-red-400'
+                        )}>
+                          {activity.amount}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
+      </motion.div>
+    </DashboardLayout>
+  );
+};
+
+export default Dashboard;
+```
+
+---
+
+### Client: `src/hooks/banking/useAccounts.js`
+
+```javascript
+import { useMemo, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSelector, useDispatch } from 'react-redux';
+import { accountService } from '@/services/api/accountService';
+import { 
+  setAccounts, 
+  updateAccount, 
+  selectAccounts 
+} from '@/store/slices/accountSlice';
+import { useToast } from '@/hooks/ui/useToast';
+
+const QUERY_KEYS = {
+  accounts: ['accounts'],
+  account: (id) => ['accounts', id],
+  accountBalance: (id) => ['accounts', id, 'balance'],
+  accountTransactions: (id) => ['accounts', id, 'transactions'],
+};
+
+export const useAccounts = (options = {}) => {
+  const { enabled = true, refetchInterval = 30000 } = options;
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const cachedAccounts = useSelector(selectAccounts);
+
+  // Fetch all accounts
+  const {
+    data: accountsData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isFetching,
+  } = useQuery({
+    queryKey: QUERY_KEYS.accounts,
+    queryFn: async () => {
+      const response = await accountService.getAccounts();
+      dispatch(setAccounts(response.data.accounts));
+      return response.data;
+    },
+    enabled,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchInterval,
+    refetchOnWindowFocus: true,
+    retry: 3,
+    onError: (err) => {
+      toast({
+        title: 'Error',
+        description: err.message || 'Failed to fetch accounts',
+        variant: 'error',
+      });
+    },
+  });
+
+  // Calculate totals
+  const totals = useMemo(() => {
+    const accounts = accountsData?.accounts || cachedAccounts || [];
+    return accounts.reduce(
+      (acc, account) => {
+        const balance = parseFloat(account.balance) || 0;
+        acc.totalBalance += balance;
+        
+        switch (account.accountType) {
+          case 'checking':
+            acc.checkingBalance += balance;
+            break;
+          case 'savings':
+            acc.savingsBalance += balance;
+            break;
+          case 'investment':
+            acc.investmentBalance += balance;
+            break;
+          case 'credit':
+            acc.creditBalance += balance;
+            break;
+        }
+        
+        return acc;
+      },
+      {
+        totalBalance: 0,
+        checkingBalance: 0,
+        savingsBalance: 0,
+        investmentBalance: 0,
+        creditBalance: 0,
+      }
+    );
+  }, [accountsData?.accounts, cachedAccounts]);
+
+  // Get primary account
+  const primaryAccount = useMemo(() => {
+    const accounts = accountsData?.accounts || cachedAccounts || [];
+    return accounts.find((acc) => acc.isPrimary) || accounts[0];
+  }, [accountsData?.accounts, cachedAccounts]);
+
+  // Get accounts by type
+  const getAccountsByType = useCallback((type) => {
+    const accounts = accountsData?.accounts || cachedAccounts || [];
+    return accounts.filter((acc) => acc.accountType === type);
+  }, [accountsData?.accounts, cachedAccounts]);
+
+  // Create account mutation
+  const createAccountMutation = useMutation({
+    mutationFn: accountService.createAccount,
+    onSuccess: (response) => {
+      queryClient.invalidateQueries(QUERY_KEYS.accounts);
+      toast({
+        title: 'Success',
+        description: 'Account created successfully',
+        variant: 'success',
+      });
+      return response.data;
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to create account',
+        variant: 'error',
+      });
+    },
+  });
+
+  // Update account mutation
+  const updateAccountMutation = useMutation({
+    mutationFn: ({ accountId, data }) => 
+      accountService.updateAccount(accountId, data),
+    onSuccess: (response, { accountId }) => {
+      queryClient.invalidateQueries(QUERY_KEYS.accounts);
+      queryClient.invalidateQueries(QUERY_KEYS.account(accountId));
+      dispatch(updateAccount(response.data.account));
+      toast({
+        title: 'Success',
+        description: 'Account updated successfully',
+        variant: 'success',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to update account',
+        variant: 'error',
+      });
+    },
+  });
+
+  // Freeze/Unfreeze account mutation
+  const toggleFreezeMutation = useMutation({
+    mutationFn: ({ accountId, freeze }) => 
+      freeze 
+        ? accountService.freezeAccount(accountId) 
+        : accountService.unfreezeAccount(accountId),
+    onSuccess: (response, { accountId, freeze }) => {
+      queryClient.invalidateQueries(QUERY_KEYS.accounts);
+      queryClient.invalidateQueries(QUERY_KEYS.account(accountId));
+      toast({
+        title: 'Success',
+        description: `Account ${freeze ? 'frozen' : 'unfrozen'} successfully`,
+        variant: 'success',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to update account status',
+        variant: 'error',
+      });
+    },
+  });
+
+  // Close account mutation
+  const closeAccountMutation = useMutation({
+    mutationFn: accountService.closeAccount,
+    onSuccess: () => {
+      queryClient.invalidateQueries(QUERY_KEYS.accounts);
+      toast({
+        title: 'Success',
+        description: 'Account closed successfully',
+        variant: 'success',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to close account',
+        variant: 'error',
+      });
+    },
+  });
+
+  // Refresh balances
+  const refreshBalances = useCallback(async () => {
+    await queryClient.invalidateQueries(QUERY_KEYS.accounts);
+    return refetch();
+  }, [queryClient, refetch]);
+
+  return {
+    // Data
+    accounts: accountsData?.accounts || cachedAccounts || [],
+    totalBalance: totals.totalBalance,
+    checkingBalance: totals.checkingBalance,
+    savingsBalance: totals.savingsBalance,
+    investmentBalance: totals.investmentBalance,
+    creditBalance: totals.creditBalance,
+    primaryAccount,
+    
+    // State
+    isLoading,
+    isFetching,
+    isError,
+    error,
+    
+    // Methods
+    refetch,
+    refreshBalances,
+    getAccountsByType,
+    
+    // Mutations
+    createAccount: createAccountMutation.mutateAsync,
+    updateAccount: updateAccountMutation.mutateAsync,
+    toggleFreeze: toggleFreezeMutation.mutateAsync,
+    closeAccount: closeAccountMutation.mutateAsync,
+    
+    // Mutation states
+    isCreating: createAccountMutation.isPending,
+    isUpdating: updateAccountMutation.isPending,
+    isToggling: toggleFreezeMutation.isPending,
+    isClosing: closeAccountMutation.isPending,
+  };
+};
+
+// Hook for single account
+export const useAccount = (accountId, options = {}) => {
+  const { enabled = true } = options;
+  const queryClient = useQueryClient();
+
+  const {
+    data: accountData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: QUERY_KEYS.account(accountId),
+    queryFn: async () => {
+      const response = await accountService.getAccountById(accountId);
+      return response.data;
+    },
+    enabled: enabled && !!accountId,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+  });
+
+  const refreshBalance = useCallback(async () => {
+    const response = await accountService.getAccountBalance(accountId);
+    queryClient.setQueryData(
+      QUERY_KEYS.account(accountId),
+      (old) => ({
+        ...old,
+        account: {
+          ...old?.account,
+          balance: response.data.balance,
+          availableBalance: response.data.availableBalance,
+        },
+      })
+    );
+    return response.data;
+  }, [accountId, queryClient]);
+
+  return {
+    account: accountData?.account,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    refreshBalance,
+  };
+};
+
+export default useAccounts;
+```
+
+---
+
+### Client: `src/styles/globals.css`
+
+```css
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* Custom Fonts */
+@layer base {
+  @font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('/fonts/Inter/Inter-Variable.woff2') format('woff2');
+  }
+
+  @font-face {
+    font-family: 'Plus Jakarta Sans';
+    font-style: normal;
+    font-weight: 200 800;
+    font-display: swap;
+    src: url('/fonts/PlusJakartaSans/PlusJakartaSans-Variable.woff2') format('woff2');
+  }
+}
+
+/* Base Styles */
+@layer base {
+  :root {
+    /* Colors */
+    --color-primary: 59 130 246;
+    --color-secondary: 100 116 139;
+    --color-success: 34 197 94;
+    --color-warning: 245 158 11;
+    --color-danger: 239 68 68;
+    
+    /* Spacing */
+    --sidebar-width: 280px;
+    --sidebar-collapsed-width: 80px;
+    --header-height: 64px;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    
+    /* Border Radius */
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-2xl: 1.5rem;
+    
+    /* Transitions */
+    --transition-fast: 150ms;
+    --transition-normal: 200ms;
+    --transition-slow: 300ms;
+  }
+
+  /* Dark mode variables */
+  .dark {
+    --color-bg-primary: 15 23 42;
+    --color-bg-secondary: 30 41 59;
+    --color-text-primary: 248 250 252;
+    --color-text-secondary: 148 163 184;
+  }
+
+  /* Scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: rgba(155, 155, 155, 0.5);
+    border-radius: 20px;
+    border: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(155, 155, 155, 0.7);
+  }
+
+  /* Base HTML */
+  html {
+    @apply antialiased;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100;
+    @apply font-sans;
+  }
+
+  /* Focus styles */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-primary-500 ring-offset-2 ring-offset-white dark:ring-offset-gray-900;
+  }
+
+  /* Selection */
+  ::selection {
+    @apply bg-primary-500/20 text-primary-900 dark:text-primary-100;
+  }
+}
+
+/* Component Styles */
+@layer components {
+  /* Cards */
+  .card {
+    @apply bg-white dark:bg-gray-800 rounded-xl shadow-card;
+    @apply border border-gray-200 dark:border-gray-700;
+  }
+
+  .card-elevated {
+    @apply bg-white dark:bg-gray-800 rounded-xl shadow-elevated;
+  }
+
+  /* Inputs */
+  .input-base {
+    @apply w-full px-4 py-2.5 rounded-lg;
+    @apply bg-white dark:bg-gray-800;
+    @apply border border-gray-300 dark:border-gray-600;
+    @apply text-gray-900 dark:text-white;
+    @apply placeholder:text-gray-400 dark:placeholder:text-gray-500;
+    @apply focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20;
+    @apply transition-all duration-200;
+  }
+
+  .input-error {
+    @apply border-red-500 focus:border-red-500 focus:ring-red-500/20;
+  }
+
+  /* Buttons */
+  .btn-base {
+    @apply inline-flex items-center justify-center gap-2;
+    @apply font-medium transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply active:scale-[0.98];
+  }
+
+  /* Badges */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full;
+    @apply text-xs font-medium;
+  }
+
+  /* Glass Effect */
+  .glass {
+    @apply bg-white/80 dark:bg-gray-900/80;
+    @apply backdrop-blur-xl backdrop-saturate-150;
+    @apply border border-white/20 dark:border-gray-700/50;
+  }
+
+  /* Gradient Text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-600 to-purple-600;
+    @apply bg-clip-text text-transparent;
+  }
+
+  /* Shimmer Effect */
+  .shimmer {
+    @apply relative overflow-hidden;
+    @apply before:absolute before:inset-0;
+    @apply before:-translate-x-full before:animate-shimmer;
+    @apply before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent;
+  }
+
+  /* Banking Card */
+  .banking-card {
+    @apply relative overflow-hidden rounded-2xl p-6;
+    @apply bg-gradient-to-br from-gray-800 via-gray-900 to-black;
+    @apply text-white shadow-elevated;
+  }
+
+  .banking-card-gold {
+    @apply bg-gradient-to-br from-yellow-600 via-amber-500 to-yellow-700;
+  }
+
+  .banking-card-platinum {
+    @apply bg-gradient-to-br from-gray-300 via-gray-400 to-gray-500;
+    @apply text-gray-900;
+  }
+
+  /* Transaction Item */
+  .transaction-item {
+    @apply flex items-center justify-between p-4;
+    @apply hover:bg-gray-50 dark:hover:bg-gray-800/50;
+    @apply transition-colors duration-200 cursor-pointer;
+    @apply border-b border-gray-100 dark:border-gray-800 last:border-0;
+  }
+
+  /* Stat Card */
+  .stat-card {
+    @apply card p-6;
+    @apply hover:shadow-card-hover transition-shadow duration-300;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    @apply fixed left-0 top-0 h-screen;
+    @apply bg-white dark:bg-gray-900;
+    @apply border-r border-gray-200 dark:border-gray-800;
+    @apply transition-all duration-300 ease-in-out;
+    @apply z-40;
+  }
+
+  .sidebar-item {
+    @apply flex items-center gap-3 px-4 py-3 mx-3 rounded-lg;
+    @apply text-gray-600 dark:text-gray-400;
+    @apply hover:bg-gray-100 dark:hover:bg-gray-800;
+    @apply hover:text-gray-900 dark:hover:text-white;
+    @apply transition-colors duration-200;
+  }
+
+  .sidebar-item.active {
+    @apply bg-primary-50 dark:bg-primary-900/20;
+    @apply text-primary-600 dark:text-primary-400;
+    @apply font-medium;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/50 backdrop-blur-sm;
+    @apply z-50 flex items-center justify-center p-4;
+  }
+
+  .modal-content {
+    @apply bg-white dark:bg-gray-800 rounded-2xl shadow-elevated;
+    @apply max-w-lg w-full max-h-[90vh] overflow-hidden;
+    @apply animate-scale-in;
+  }
+
+  /* Tooltip */
+  .tooltip {
+    @apply absolute z-50 px-2 py-1 rounded-md;
+    @apply bg-gray-900 dark:bg-gray-700 text-white;
+    @apply text-xs font-medium whitespace-nowrap;
+    @apply shadow-lg;
+  }
+
+  /* Dropdown */
+  .dropdown-menu {
+    @apply absolute z-50 min-w-[200px] py-2;
+    @apply bg-white dark:bg-gray-800 rounded-xl shadow-elevated;
+    @apply border border-gray-200 dark:border-gray-700;
+    @apply animate-fade-in;
+  }
+
+  .dropdown-item {
+    @apply flex items-center gap-2 px-4 py-2;
+    @apply text-sm text-gray-700 dark:text-gray-200;
+    @apply hover:bg-gray-100 dark:hover:bg-gray-700;
+    @apply transition-colors duration-150 cursor-pointer;
+  }
+}
+
+/* Utility Styles */
+@layer utilities {
+  /* Perspective for 3D effects */
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  .transform-style-3d {
+    transform-style: preserve-3d;
+  }
+
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+
+  .rotateY-180 {
+    transform: rotateY(180deg);
+  }
+
+  /* Hide scrollbar */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Line clamp */
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Text balance */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Gradient masks */
+  .mask-gradient-b {
+    mask-image: linear-gradient(to bottom, black 60%, transparent);
+  }
+
+  .mask-gradient-r {
+    mask-image: linear-gradient(to right, black 60%, transparent);
+  }
+
+  /* Animation delays */
+  .animation-delay-100 { animation-delay: 100ms; }
+  .animation-delay-200 { animation-delay: 200ms; }
+  .animation-delay-300 { animation-delay: 300ms; }
+  .animation-delay-400 { animation-delay: 400ms; }
+  .animation-delay-500 { animation-delay: 500ms; }
+
+  /* Aspect ratios */
+  .aspect-card {
+    aspect-ratio: 1.586;
+  }
+
+  /* Safe area */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-break-before {
+    break-before: page;
+  }
+
+  .print-break-after {
+    break-after: page;
+  }
+
+  body {
+    @apply text-black bg-white;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+```
+
+---
+
+This comprehensive enterprise-level structure includes:
+
+## Key Features
+
+### Client (React + Vite + Tailwind)
+- ✅ Complete component library with atomic design
+- ✅ Redux Toolkit with slices, thunks, and selectors  
+- ✅ React Query for server state management
+- ✅ Comprehensive custom hooks library
+- ✅ Feature-based architecture
+- ✅ Multi-language support (i18n)
+- ✅ Dark/Light theme support
+- ✅ Framer Motion animations
+- ✅ Form validation with schemas
+- ✅ Type definitions
+- ✅ Testing setup (Vitest + Testing Library)
+
+### Server (Node.js + Express)
+- ✅ Modular API structure (v1, v2)
+- ✅ Service layer pattern
+- ✅ Repository pattern for data access
+- ✅ Comprehensive middleware stack
+- ✅ Job queues and schedulers (Bull)
+- ✅ WebSocket support
+- ✅ Third-party integrations (Stripe, Plaid, Twilio)
+- ✅ Email templates
+- ✅ Audit logging
+- ✅ Fraud detection service
+
+### Infrastructure
+- ✅ Docker configuration
+- ✅ CI/CD workflows
+- ✅ Security policies
+- ✅ Database migrations & seeders
+- ✅ Comprehensive documentation
