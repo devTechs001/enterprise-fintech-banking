@@ -1,0 +1,10 @@
+{
+  "name": "enterprise-fintech-banking",
+  "version": "1.0.0",
+  "useWorkspaces": true,
+  "packages": [
+    "client",
+    "server",
+    "shared"
+  ]
+}
