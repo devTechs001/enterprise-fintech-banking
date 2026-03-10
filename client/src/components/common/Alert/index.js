@@ -1,2 +1,2 @@
-export { Alert } from './Alert';
-export { default as AlertDefault } from './Alert';
+export { Alert, alertVariants } from './Alert';
+export default Alert;

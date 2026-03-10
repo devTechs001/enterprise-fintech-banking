@@ -1,115 +1,153 @@
+import { forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import { cn } from '@/utils/helpers';
 
-const Avatar = ({ src, alt, fallback, size = 'md', className, ...props }) => {
-  const sizeClasses = {
-    xs: 'w-6 h-6 text-xs',
-    sm: 'w-8 h-8 text-sm',
-    md: 'w-10 h-10 text-base',
-    lg: 'w-12 h-12 text-lg',
-    xl: 'w-16 h-16 text-xl',
-    '2xl': 'w-20 h-20 text-2xl',
-  };
+const Avatar = forwardRef(
+  (
+    {
+      className,
+      src,
+      alt,
+      name,
+      size = 'md',
+      variant = 'image',
+      status,
+      ...props
+    },
+    ref
+  ) => {
+    const sizeClasses = {
+      xs: 'h-6 w-6 text-xs',
+      sm: 'h-8 w-8 text-xs',
+      md: 'h-10 w-10 text-sm',
+      lg: 'h-12 w-12 text-base',
+      xl: 'h-16 w-16 text-lg',
+      '2xl': 'h-20 w-20 text-xl',
+    };
 
-  const getInitials = (name) => {
-    if (!name) return '?';
-    const names = name.trim().split(' ');
-    const initials = names.length > 1
-      ? `${names[0][0]}${names[names.length - 1][0]}`
-      : names[0][0];
-    return initials.toUpperCase();
-  };
+    const statusClasses = {
+      online: 'bg-success-500',
+      offline: 'bg-gray-400',
+      busy: 'bg-danger-500',
+      away: 'bg-warning-500',
+    };
 
-  return (
-    <div
-      className={cn(
-        'relative inline-flex items-center justify-center rounded-full overflow-hidden',
-        'bg-gray-200 dark:bg-gray-700',
-        'flex-shrink-0',
-        sizeClasses[size],
-        className
-      )}
-      {...props}
-    >
-      {src ? (
-        <img
-          src={src}
-          alt={alt || 'Avatar'}
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            e.target.style.display = 'none';
-            e.target.nextSibling.style.display = 'flex';
-          }}
-        />
-      ) : null}
-      <span
+    const statusPositionClasses = {
+      xs: 'h-1.5 w-1.5 bottom-0 right-0',
+      sm: 'h-2 w-2 bottom-0 right-0',
+      md: 'h-2.5 w-2.5 bottom-0 right-0',
+      lg: 'h-3 w-3 bottom-0 right-0',
+      xl: 'h-4 w-4 bottom-0 right-0',
+      '2xl': 'h-5 w-5 bottom-0 right-0',
+    };
+
+    const getInitials = (name) => {
+      if (!name) return '';
+      const names = name.split(' ');
+      if (names.length >= 2) {
+        return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
+      }
+      return name.slice(0, 2).toUpperCase();
+    };
+
+    return (
+      <div
+        ref={ref}
         className={cn(
-          'w-full h-full flex items-center justify-center font-medium',
-          'text-gray-600 dark:text-gray-300',
-          src && 'hidden'
+          'relative inline-flex items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900',
+          sizeClasses[size],
+          className
         )}
+        {...props}
       >
-        {fallback || getInitials(alt)}
-      </span>
-    </div>
-  );
-};
+        {variant === 'image' && src ? (
+          <img
+            src={src}
+            alt={alt || name}
+            className="h-full w-full object-cover rounded-full"
+          />
+        ) : (
+          <span className="font-medium text-primary-700 dark:text-primary-300">
+            {getInitials(name)}
+          </span>
+        )}
+        {status && (
+          <span
+            className={cn(
+              'absolute rounded-full border-2 border-white dark:border-gray-900',
+              statusClasses[status],
+              statusPositionClasses[size]
+            )}
+          />
+        )}
+      </div>
+    );
+  }
+);
+
+Avatar.displayName = 'Avatar';
 
 Avatar.propTypes = {
+  className: PropTypes.string,
   src: PropTypes.string,
   alt: PropTypes.string,
-  fallback: PropTypes.string,
+  name: PropTypes.string,
   size: PropTypes.oneOf(['xs', 'sm', 'md', 'lg', 'xl', '2xl']),
-  className: PropTypes.string,
+  variant: PropTypes.oneOf(['image', 'initials']),
+  status: PropTypes.oneOf(['online', 'offline', 'busy', 'away']),
 };
 
-const AvatarGroup = ({ children, max = 4, size = 'md', className }) => {
-  const validChildren = [];
-  
-  // Collect valid children
-  children.forEach((child) => {
-    if (child && child.type === Avatar) {
-      validChildren.push(child);
-    }
-  });
+const AvatarGroup = forwardRef(
+  ({ className, avatars, max = 4, size = 'md' }, ref) => {
+    const displayedAvatars = avatars.slice(0, max);
+    const remaining = avatars.length - max;
 
-  const displayChildren = validChildren.slice(0, max);
-  const remainingCount = validChildren.length - max;
+    return (
+      <div ref={ref} className={cn('flex items-center', className)}>
+        {displayedAvatars.map((avatar, index) => (
+          <Avatar
+            key={avatar.id || index}
+            {...avatar}
+            size={size}
+            className={cn(
+              'border-2 border-white dark:border-gray-900',
+              index > 0 && '-ml-2'
+            )}
+          />
+        ))}
+        {remaining > 0 && (
+          <div
+            className={cn(
+              '-ml-2 flex items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700',
+              size === 'xs' && 'h-6 w-6 text-xs',
+              size === 'sm' && 'h-8 w-8 text-xs',
+              size === 'md' && 'h-10 w-10 text-sm',
+              size === 'lg' && 'h-12 w-12 text-base',
+              size === 'xl' && 'h-16 w-16 text-lg',
+              size === '2xl' && 'h-20 w-20 text-xl'
+            )}
+          >
+            +{remaining}
+          </div>
+        )}
+      </div>
+    );
+  }
+);
 
-  return (
-    <div className={cn('flex -space-x-2', className)}>
-      {displayChildren.map((child, index) => (
-        <div key={index} className="ring-2 ring-white dark:ring-gray-800 rounded-full">
-          {child}
-        </div>
-      ))}
-      {remainingCount > 0 && (
-        <div
-          className={cn(
-            'flex items-center justify-center rounded-full bg-gray-300 dark:bg-gray-600',
-            'ring-2 ring-white dark:ring-gray-800',
-            size === 'xs' && 'w-6 h-6 text-xs',
-            size === 'sm' && 'w-8 h-8 text-sm',
-            size === 'md' && 'w-10 h-10 text-sm',
-            size === 'lg' && 'w-12 h-12 text-base',
-            size === 'xl' && 'w-16 h-16 text-lg',
-            size === '2xl' && 'w-20 h-20 text-xl',
-          )}
-        >
-          <span className="font-medium text-gray-600 dark:text-gray-300">
-            +{remainingCount}
-          </span>
-        </div>
-      )}
-    </div>
-  );
-};
+AvatarGroup.displayName = 'AvatarGroup';
 
 AvatarGroup.propTypes = {
-  children: PropTypes.node.isRequired,
+  className: PropTypes.string,
+  avatars: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    src: PropTypes.string,
+    alt: PropTypes.string,
+    name: PropTypes.string,
+    status: PropTypes.oneOf(['online', 'offline', 'busy', 'away']),
+  })).isRequired,
   max: PropTypes.number,
   size: PropTypes.oneOf(['xs', 'sm', 'md', 'lg', 'xl', '2xl']),
-  className: PropTypes.string,
 };
 
 export { Avatar, AvatarGroup };

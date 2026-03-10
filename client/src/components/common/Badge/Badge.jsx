@@ -1,60 +1,81 @@
+import { forwardRef } from 'react';
 import PropTypes from 'prop-types';
+import { cva } from 'class-variance-authority';
 import { cn } from '@/utils/helpers';
 
-const Badge = ({
-  children,
-  variant = 'default',
-  size = 'md',
-  className,
-  ...props
-}) => {
-  const variantClasses = {
-    default: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
-    primary: 'bg-primary-100 text-primary-800 dark:bg-primary-900/50 dark:text-primary-200',
-    secondary: 'bg-secondary-100 text-secondary-800 dark:bg-secondary-900/50 dark:text-secondary-200',
-    success: 'bg-success-100 text-success-800 dark:bg-success-900/50 dark:text-success-200',
-    warning: 'bg-warning-100 text-warning-800 dark:bg-warning-900/50 dark:text-warning-200',
-    danger: 'bg-danger-100 text-danger-800 dark:bg-danger-900/50 dark:text-danger-200',
-    info: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200',
-    outline: 'border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300',
-  };
+const badgeVariants = cva(
+  'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+  {
+    variants: {
+      variant: {
+        default: 'bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-200',
+        secondary: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
+        success: 'bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-200',
+        danger: 'bg-danger-100 text-danger-800 dark:bg-danger-900 dark:text-danger-200',
+        warning: 'bg-warning-100 text-warning-800 dark:bg-warning-900 dark:text-warning-200',
+        info: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+        outline: 'border border-gray-300 text-gray-700 dark:border-gray-600 dark:text-gray-300',
+      },
+      size: {
+        sm: 'px-1.5 py-0.5 text-xs',
+        md: 'px-2.5 py-0.5 text-xs',
+        lg: 'px-3 py-1 text-sm',
+      },
+      dot: {
+        true: 'gap-1.5 pl-1',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+      size: 'md',
+    },
+  }
+);
 
-  const sizeClasses = {
-    sm: 'px-2 py-0.5 text-xs',
-    md: 'px-2.5 py-0.5 text-sm',
-    lg: 'px-3 py-1 text-base',
-  };
+const Badge = forwardRef(
+  (
+    {
+      className,
+      variant,
+      size,
+      dot,
+      children,
+      ...props
+    },
+    ref
+  ) => {
+    return (
+      <span
+        ref={ref}
+        className={cn(badgeVariants({ variant, size, dot }), className)}
+        {...props}
+      >
+        {dot && (
+          <span className={cn(
+            'h-1.5 w-1.5 rounded-full',
+            variant === 'success' && 'bg-success-500',
+            variant === 'danger' && 'bg-danger-500',
+            variant === 'warning' && 'bg-warning-500',
+            variant === 'info' && 'bg-blue-500',
+            variant === 'default' && 'bg-primary-500',
+            variant === 'secondary' && 'bg-gray-500'
+          )} />
+        )}
+        {children}
+      </span>
+    );
+  }
+);
 
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center font-medium rounded-full',
-        variantClasses[variant],
-        sizeClasses[size],
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </span>
-  );
-};
+Badge.displayName = 'Badge';
 
 Badge.propTypes = {
-  children: PropTypes.node.isRequired,
-  variant: PropTypes.oneOf([
-    'default',
-    'primary',
-    'secondary',
-    'success',
-    'warning',
-    'danger',
-    'info',
-    'outline',
-  ]),
-  size: PropTypes.oneOf(['sm', 'md', 'lg']),
   className: PropTypes.string,
+  variant: PropTypes.oneOf(['default', 'secondary', 'success', 'danger', 'warning', 'info', 'outline']),
+  size: PropTypes.oneOf(['sm', 'md', 'lg']),
+  dot: PropTypes.bool,
+  children: PropTypes.node,
 };
 
-export { Badge };
+export { Badge, badgeVariants };
 export default Badge;

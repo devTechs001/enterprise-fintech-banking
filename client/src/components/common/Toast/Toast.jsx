@@ -1,176 +1,142 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { forwardRef, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { cva } from 'class-variance-authority';
+import { X, CheckCircle, AlertCircle, Info, XCircle } from 'lucide-react';
 import { cn } from '@/utils/helpers';
-import { CheckCircle, XCircle, AlertCircle, Info, X } from 'lucide-react';
+import { Button } from '../Button';
 
-const ToastContext = createContext(null);
-
-const ToastProvider = ({ children, position = 'top-right' }) => {
-  const [toasts, setToasts] = useState([]);
-
-  const addToast = useCallback((toast) => {
-    const id = Date.now().toString();
-    const newToast = {
-      id,
-      duration: 5000,
-      ...toast,
-    };
-
-    setToasts((prev) => [...prev, newToast]);
-
-    if (newToast.duration !== Infinity) {
-      setTimeout(() => {
-        removeToast(id);
-      }, newToast.duration);
-    }
-
-    return id;
-  }, []);
-
-  const removeToast = useCallback((id) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id));
-  }, []);
-
-  const updateToast = useCallback((id, updates) => {
-    setToasts((prev) =>
-      prev.map((toast) => (toast.id === id ? { ...toast, ...updates } : toast))
-    );
-  }, []);
-
-  const toast = useCallback(
-    (toastConfig) => {
-      return addToast(toastConfig);
+const toastVariants = cva(
+  'group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-lg border p-4 pr-8 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full',
+  {
+    variants: {
+      variant: {
+        default: 'border-gray-200 bg-white text-gray-900 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100',
+        success: 'border-success-200 bg-success-50 text-success-900 dark:border-success-800 dark:bg-success-900/20 dark:text-success-100',
+        error: 'border-danger-200 bg-danger-50 text-danger-900 dark:border-danger-800 dark:bg-danger-900/20 dark:text-danger-100',
+        warning: 'border-warning-200 bg-warning-50 text-warning-900 dark:border-warning-800 dark:bg-warning-900/20 dark:text-warning-100',
+        info: 'border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-100',
+      },
     },
-    [addToast]
-  );
+    defaultVariants: {
+      variant: 'default',
+    },
+  }
+);
 
-  toast.success = (title, description) =>
-    addToast({ title, description, variant: 'success' });
-  toast.error = (title, description) =>
-    addToast({ title, description, variant: 'error' });
-  toast.warning = (title, description) =>
-    addToast({ title, description, variant: 'warning' });
-  toast.info = (title, description) =>
-    addToast({ title, description, variant: 'info' });
-
-  const positionClasses = {
-    'top-right': 'top-4 right-4',
-    'top-left': 'top-4 left-4',
-    'top-center': 'top-4 left-1/2 -translate-x-1/2',
-    'bottom-right': 'bottom-4 right-4',
-    'bottom-left': 'bottom-4 left-4',
-    'bottom-center': 'bottom-4 left-1/2 -translate-x-1/2',
-  };
-
-  return (
-    <ToastContext.Provider value={{ toast, addToast, removeToast, updateToast }}>
-      {children}
-      {createPortal(
-        <div
-          className={cn(
-            'fixed z-[100] flex flex-col gap-2 max-w-[420px]',
-            positionClasses[position]
-          )}
-        >
-          <AnimatePresence>
-            {toasts.map((toastItem) => (
-              <ToastItem
-                key={toastItem.id}
-                toast={toastItem}
-                onDismiss={() => removeToast(toastItem.id)}
-              />
-            ))}
-          </AnimatePresence>
-        </div>,
-        document.body
-      )}
-    </ToastContext.Provider>
-  );
-};
-
-ToastProvider.propTypes = {
-  children: PropTypes.node.isRequired,
-  position: PropTypes.oneOf([
-    'top-right',
-    'top-left',
-    'top-center',
-    'bottom-right',
-    'bottom-left',
-    'bottom-center',
-  ]),
-};
-
-const variantIcons = {
+const iconMap = {
+  default: Info,
   success: CheckCircle,
   error: XCircle,
   warning: AlertCircle,
   info: Info,
 };
 
-const variantClasses = {
-  success: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800',
-  error: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800',
-  warning: 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800',
-  info: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800',
+const Toast = forwardRef(
+  (
+    {
+      className,
+      variant,
+      title,
+      description,
+      icon: CustomIcon,
+      action,
+      onDismiss,
+      duration = 5000,
+      ...props
+    },
+    ref
+  ) => {
+    const Icon = CustomIcon || iconMap[variant] || iconMap.default;
+
+    return (
+      <div
+        ref={ref}
+        className={cn(toastVariants({ variant }), className)}
+        {...props}
+      >
+        <div className="flex gap-3">
+          <Icon className="h-5 w-5 flex-shrink-0" />
+          <div className="space-y-1">
+            {title && (
+              <p className="font-medium text-sm">{title}</p>
+            )}
+            {description && (
+              <p className="text-sm opacity-90">{description}</p>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {action && (
+            <Button
+              size="sm"
+              variant={variant === 'error' ? 'danger' : 'primary'}
+              {...action}
+            />
+          )}
+          {onDismiss && (
+            <button
+              onClick={onDismiss}
+              className="absolute right-2 top-2 rounded-md p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+);
+
+Toast.displayName = 'Toast';
+
+Toast.propTypes = {
+  className: PropTypes.string,
+  variant: PropTypes.oneOf(['default', 'success', 'error', 'warning', 'info']),
+  title: PropTypes.string,
+  description: PropTypes.string,
+  icon: PropTypes.elementType,
+  action: PropTypes.shape({
+    children: PropTypes.node,
+    onClick: PropTypes.func,
+  }),
+  onDismiss: PropTypes.func,
+  duration: PropTypes.number,
 };
 
-const ToastItem = ({ toast, onDismiss }) => {
-  const Icon = variantIcons[toast.variant] || Info;
+// Toast Container
+const ToastContainer = ({ toasts, removeToast, position = 'top-right' }) => {
+  const positionClasses = {
+    'top-right': 'top-0 right-0',
+    'top-left': 'top-0 left-0',
+    'bottom-right': 'bottom-0 right-0',
+    'bottom-left': 'bottom-0 left-0',
+    'top-center': 'top-0 left-1/2 -translate-x-1/2',
+    'bottom-center': 'bottom-0 left-1/2 -translate-x-1/2',
+  };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -20, scale: 0.9 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, x: 100, scale: 0.9 }}
-      transition={{ duration: 0.2 }}
+    <div
       className={cn(
-        'flex items-start gap-3 p-4 rounded-lg border shadow-lg',
-        variantClasses[toast.variant]
+        'fixed z-[100] flex max-h-screen w-full flex-col gap-2 p-4 sm:max-w-[420px]',
+        positionClasses[position]
       )}
     >
-      <Icon className="w-5 h-5 flex-shrink-0 mt-0.5" />
-      <div className="flex-1">
-        {toast.title && (
-          <h4 className="font-medium text-sm">{toast.title}</h4>
-        )}
-        {toast.description && (
-          <p className="text-sm opacity-90 mt-1">{toast.description}</p>
-        )}
-        {toast.action && (
-          <div className="mt-2">{toast.action}</div>
-        )}
-      </div>
-      <button
-        onClick={onDismiss}
-        className="flex-shrink-0 opacity-50 hover:opacity-100 transition-opacity"
-      >
-        <X className="w-4 h-4" />
-      </button>
-    </motion.div>
+      {toasts.map((toast) => (
+        <Toast
+          key={toast.id}
+          {...toast}
+          onDismiss={() => removeToast(toast.id)}
+        />
+      ))}
+    </div>
   );
 };
 
-ToastItem.propTypes = {
-  toast: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    title: PropTypes.node,
-    description: PropTypes.node,
-    variant: PropTypes.oneOf(['success', 'error', 'warning', 'info']),
-    duration: PropTypes.number,
-    action: PropTypes.node,
-  }).isRequired,
-  onDismiss: PropTypes.func.isRequired,
+ToastContainer.propTypes = {
+  toasts: PropTypes.arrayOf(PropTypes.object).isRequired,
+  removeToast: PropTypes.func.isRequired,
+  position: PropTypes.oneOf(['top-right', 'top-left', 'bottom-right', 'bottom-left', 'top-center', 'bottom-center']),
 };
 
-const useToast = () => {
-  const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error('useToast must be used within a ToastProvider');
-  }
-  return context;
-};
-
-export { ToastProvider, useToast };
-export default ToastProvider;
+export { Toast, ToastContainer, toastVariants };
+export default Toast;

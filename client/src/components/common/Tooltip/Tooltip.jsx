@@ -1,102 +1,105 @@
-import { useState, useRef } from 'react';
+import { forwardRef, useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { createPortal } from 'react-dom';
 import { cn } from '@/utils/helpers';
+import { useClickOutside } from '@/hooks/ui/useClickOutside';
 
-const Tooltip = ({
-  children,
-  content,
-  position = 'top',
-  delay = 200,
-  className,
-  contentClassName,
-  disabled = false,
-}) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const timeoutRef = useRef(null);
+const Tooltip = forwardRef(
+  (
+    {
+      className,
+      content,
+      children,
+      position = 'top',
+      delay = 200,
+      disabled = false,
+      ...props
+    },
+    ref
+  ) => {
+    const [isVisible, setIsVisible] = useState(false);
+    const [mounted, setMounted] = useState(false);
+    const triggerRef = useRef(null);
+    const tooltipRef = useRef(null);
 
-  const showTooltip = () => {
-    if (disabled) return;
-    timeoutRef.current = setTimeout(() => {
-      setIsVisible(true);
-    }, delay);
-  };
+    useEffect(() => {
+      setMounted(true);
+    }, []);
 
-  const hideTooltip = () => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    setIsVisible(false);
-  };
+    const showTimeout = useRef(null);
 
-  const positionClasses = {
-    top: 'bottom-full left-1/2 -translate-x-1/2 mb-2',
-    bottom: 'top-full left-1/2 -translate-x-1/2 mt-2',
-    left: 'right-full top-1/2 -translate-y-1/2 mr-2',
-    right: 'left-full top-1/2 -translate-y-1/2 ml-2',
-    'top-start': 'bottom-full left-0 mb-2',
-    'top-end': 'bottom-full right-0 mb-2',
-    'bottom-start': 'top-full left-0 mt-2',
-    'bottom-end': 'top-full right-0 mt-2',
-  };
+    const handleMouseEnter = () => {
+      if (disabled) return;
+      showTimeout.current = setTimeout(() => {
+        setIsVisible(true);
+      }, delay);
+    };
 
-  if (disabled) {
-    return children;
-  }
+    const handleMouseLeave = () => {
+      if (showTimeout.current) {
+        clearTimeout(showTimeout.current);
+      }
+      setIsVisible(false);
+    };
 
-  return (
-    <div
-      className="relative inline-block"
-      onMouseEnter={showTooltip}
-      onMouseLeave={hideTooltip}
-      onFocus={showTooltip}
-      onBlur={hideTooltip}
-    >
-      {children}
-      {isVisible && (
-        <div
-          className={cn(
-            'absolute z-50 px-2 py-1',
-            'bg-gray-900 dark:bg-gray-700 text-white',
-            'text-xs font-medium rounded-md whitespace-nowrap',
-            'shadow-lg animate-fade-in',
-            positionClasses[position],
-            contentClassName
-          )}
-          role="tooltip"
+    useClickOutside(tooltipRef, () => setIsVisible(false));
+
+    const positionClasses = {
+      top: 'bottom-full left-1/2 -translate-x-1/2 mb-2',
+      bottom: 'top-full left-1/2 -translate-x-1/2 mt-2',
+      left: 'right-full top-1/2 -translate-y-1/2 mr-2',
+      right: 'left-full top-1/2 -translate-y-1/2 ml-2',
+    };
+
+    const arrowClasses = {
+      top: 'absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-gray-900',
+      bottom: 'absolute bottom-full left-1/2 -translate-x-1/2 border-8 border-transparent border-b-gray-900',
+      left: 'absolute left-full top-1/2 -translate-y-1/2 border-8 border-transparent border-l-gray-900',
+      right: 'absolute right-full top-1/2 -translate-y-1/2 border-8 border-transparent border-r-gray-900',
+    };
+
+    const tooltip = (
+      <div
+        ref={tooltipRef}
+        className={cn(
+          'relative z-50 px-3 py-1.5 text-xs font-medium text-white bg-gray-900 rounded-lg shadow-lg whitespace-nowrap animate-fade-in',
+          positionClasses[position],
+          className
+        )}
+        role="tooltip"
+        {...props}
+      >
+        {content}
+        <div className={arrowClasses[position]} />
+      </div>
+    );
+
+    return (
+      <>
+        <span
+          ref={triggerRef}
+          className="inline-block"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          onFocus={handleMouseEnter}
+          onBlur={handleMouseLeave}
         >
-          {content}
-          {/* Arrow */}
-          <div
-            className={cn(
-              'absolute w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45',
-              position === 'top' && 'left-1/2 -translate-x-1/2 -bottom-1',
-              position === 'bottom' && 'left-1/2 -translate-x-1/2 -top-1',
-              position === 'left' && 'top-1/2 -translate-y-1/2 -right-1',
-              position === 'right' && 'top-1/2 -translate-y-1/2 -left-1'
-            )}
-          />
-        </div>
-      )}
-    </div>
-  );
-};
+          {children}
+        </span>
+        {mounted && isVisible && createPortal(tooltip, document.body)}
+      </>
+    );
+  }
+);
+
+Tooltip.displayName = 'Tooltip';
 
 Tooltip.propTypes = {
-  children: PropTypes.node.isRequired,
-  content: PropTypes.node.isRequired,
-  position: PropTypes.oneOf([
-    'top',
-    'bottom',
-    'left',
-    'right',
-    'top-start',
-    'top-end',
-    'bottom-start',
-    'bottom-end',
-  ]),
-  delay: PropTypes.number,
   className: PropTypes.string,
-  contentClassName: PropTypes.string,
+  content: PropTypes.node.isRequired,
+  children: PropTypes.node.isRequired,
+  position: PropTypes.oneOf(['top', 'bottom', 'left', 'right']),
+  delay: PropTypes.number,
   disabled: PropTypes.bool,
 };
 

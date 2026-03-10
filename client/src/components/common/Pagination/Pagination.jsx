@@ -1,165 +1,150 @@
+import { forwardRef } from 'react';
 import PropTypes from 'prop-types';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/utils/helpers';
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
-import { Button } from '@/components/common/Button';
+import { Button } from '../Button';
 
-const Pagination = ({
-  currentPage,
-  totalPages,
-  onPageChange,
-  pageSize = 10,
-  totalItems,
-  showSizeChanger = true,
-  showQuickJumper = false,
-  className,
-}) => {
-  const startItem = (currentPage - 1) * pageSize + 1;
-  const endItem = Math.min(currentPage * pageSize, totalItems || 0);
+const Pagination = forwardRef(
+  (
+    {
+      className,
+      currentPage,
+      totalPages,
+      onPageChange,
+      pageSize = 10,
+      totalItems,
+      showSizeChanger = true,
+      sizeOptions = [10, 25, 50, 100],
+      onPageSizeChange,
+      showQuickJumper = false,
+      ...props
+    },
+    ref
+  ) => {
+    const getPageNumbers = () => {
+      const pages = [];
+      const maxVisible = 5;
+      let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+      let endPage = Math.min(totalPages, startPage + maxVisible - 1);
 
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxVisible = 5;
+      if (endPage - startPage + 1 < maxVisible) {
+        startPage = Math.max(1, endPage - maxVisible + 1);
+      }
 
-    if (totalPages <= maxVisible) {
-      for (let i = 1; i <= totalPages; i++) {
+      if (startPage > 1) {
+        pages.push(1);
+        if (startPage > 2) pages.push('...');
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
         pages.push(i);
       }
-    } else {
-      if (currentPage <= 3) {
-        for (let i = 1; i <= 4; i++) pages.push(i);
-        pages.push('...');
-        pages.push(totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(1);
-        pages.push('...');
-        for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i);
-      } else {
-        pages.push(1);
-        pages.push('...');
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i);
-        pages.push('...');
+
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) pages.push('...');
         pages.push(totalPages);
       }
-    }
 
-    return pages;
-  };
+      return pages;
+    };
 
-  if (totalPages <= 1) return null;
+    const startIndex = (currentPage - 1) * pageSize + 1;
+    const endIndex = Math.min(currentPage * pageSize, totalItems || 0);
 
-  return (
-    <div className={cn('flex items-center gap-2', className)}>
-      {/* Total items info */}
-      {totalItems && (
-        <span className="text-sm text-gray-500 dark:text-gray-400">
-          Showing {startItem}-{endItem} of {totalItems}
-        </span>
-      )}
-
-      <div className="flex items-center gap-1 ml-auto">
-        {/* First page */}
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={() => onPageChange(1)}
-          disabled={currentPage === 1}
-          className="hidden sm:flex"
-        >
-          <ChevronsLeft className="w-4 h-4" />
-        </Button>
-
-        {/* Previous page */}
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-        >
-          <ChevronLeft className="w-4 h-4" />
-        </Button>
-
-        {/* Page numbers */}
-        {getPageNumbers().map((page, index) =>
-          page === '...' ? (
-            <span
-              key={`ellipsis-${index}`}
-              className="px-2 text-gray-400"
-            >
-              ...
-            </span>
+    return (
+      <div ref={ref} className={cn('flex items-center justify-between gap-4', className)} {...props}>
+        {/* Info */}
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          {totalItems ? (
+            `Showing ${startIndex} to ${endIndex} of ${totalItems} results`
           ) : (
+            `Page ${currentPage} of ${totalPages}`
+          )}
+        </div>
+
+        {/* Pagination Controls */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onPageChange?.(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+
+          {getPageNumbers().map((page, index) => (
             <Button
-              key={page}
-              variant={currentPage === page ? 'primary' : 'ghost'}
-              size="icon-sm"
-              onClick={() => onPageChange(page)}
-              className={cn(
-                currentPage === page &&
-                  'bg-primary-600 text-white hover:bg-primary-700'
-              )}
+              key={index}
+              variant={page === currentPage ? 'primary' : 'outline'}
+              size="sm"
+              onClick={() => typeof page === 'number' && onPageChange?.(page)}
+              disabled={page === '...'}
             >
               {page}
             </Button>
-          )
+          ))}
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onPageChange?.(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Size Changer */}
+        {showSizeChanger && (
+          <select
+            value={pageSize}
+            onChange={(e) => onPageSizeChange?.(Number(e.target.value))}
+            className="h-8 px-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-900"
+          >
+            {sizeOptions.map((size) => (
+              <option key={size} value={size}>
+                {size} / page
+              </option>
+            ))}
+          </select>
         )}
 
-        {/* Next page */}
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-        >
-          <ChevronRight className="w-4 h-4" />
-        </Button>
-
-        {/* Last page */}
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={() => onPageChange(totalPages)}
-          disabled={currentPage === totalPages}
-          className="hidden sm:flex"
-        >
-          <ChevronsRight className="w-4 h-4" />
-        </Button>
+        {/* Quick Jumper */}
+        {showQuickJumper && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600 dark:text-gray-400">Go to</span>
+            <input
+              type="number"
+              min={1}
+              max={totalPages}
+              defaultValue={currentPage}
+              onBlur={(e) => {
+                const page = Math.min(Math.max(1, Number(e.target.value)), totalPages);
+                onPageChange?.(page);
+              }}
+              className="w-16 h-8 px-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-900"
+            />
+          </div>
+        )}
       </div>
+    );
+  }
+);
 
-      {/* Quick jumper */}
-      {showQuickJumper && (
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-500 dark:text-gray-400">
-            Go to
-          </span>
-          <input
-            type="number"
-            min={1}
-            max={totalPages}
-            className="w-16 px-2 py-1 text-sm border rounded-md dark:bg-gray-800 dark:border-gray-700"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                const page = parseInt(e.target.value);
-                if (page >= 1 && page <= totalPages) {
-                  onPageChange(page);
-                }
-              }
-            }}
-          />
-        </div>
-      )}
-    </div>
-  );
-};
+Pagination.displayName = 'Pagination';
 
 Pagination.propTypes = {
+  className: PropTypes.string,
   currentPage: PropTypes.number.isRequired,
   totalPages: PropTypes.number.isRequired,
-  onPageChange: PropTypes.func.isRequired,
+  onPageChange: PropTypes.func,
   pageSize: PropTypes.number,
   totalItems: PropTypes.number,
   showSizeChanger: PropTypes.bool,
+  sizeOptions: PropTypes.arrayOf(PropTypes.number),
+  onPageSizeChange: PropTypes.func,
   showQuickJumper: PropTypes.bool,
-  className: PropTypes.string,
 };
 
 export { Pagination };

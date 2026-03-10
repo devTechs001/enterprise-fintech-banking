@@ -5,68 +5,54 @@ import { cn } from '@/utils/helpers';
 const Radio = forwardRef(
   (
     {
-      checked = false,
+      className,
+      checked,
       onChange,
       label,
       disabled = false,
       error,
-      className,
-      id,
-      value,
-      name,
       ...props
     },
     ref
   ) => {
-    const radioId = id || `radio-${Math.random().toString(36).substr(2, 9)}`;
-
     return (
-      <div className={cn('flex items-start gap-3', className)}>
-        <div className="relative flex items-center">
-          <input
-            ref={ref}
-            type="radio"
-            id={radioId}
-            name={name}
-            value={value}
-            checked={checked}
-            onChange={onChange}
-            disabled={disabled}
-            className={cn('peer sr-only', disabled && 'cursor-not-allowed')}
-            {...props}
-          />
-          <label
-            htmlFor={radioId}
-            className={cn(
-              'w-5 h-5 border-2 rounded-full transition-all duration-200',
-              'flex items-center justify-center',
-              'cursor-pointer',
-              checked
-                ? 'border-primary-600'
-                : 'border-gray-300 dark:border-gray-600',
-              disabled && 'opacity-50 cursor-not-allowed',
-              error && 'border-danger-500'
-            )}
-          >
-            {checked && (
-              <span className="w-2.5 h-2.5 rounded-full bg-primary-600" />
-            )}
-          </label>
-        </div>
-
+      <div className="flex items-start gap-3">
+        <button
+          ref={ref}
+          type="button"
+          role="radio"
+          aria-checked={checked}
+          disabled={disabled}
+          onClick={() => !disabled && onChange?.(true)}
+          className={cn(
+            'peer relative h-5 w-5 flex-shrink-0 rounded-full border transition-colors',
+            'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
+            checked
+              ? 'border-primary-600'
+              : 'bg-white border-gray-300 hover:border-gray-400 dark:bg-gray-900 dark:border-gray-600',
+            disabled && 'cursor-not-allowed opacity-50',
+            error && 'border-danger-500',
+            className
+          )}
+          {...props}
+        >
+          {checked && (
+            <span className="absolute inset-1 rounded-full bg-primary-600" />
+          )}
+        </button>
         {label && (
           <label
-            htmlFor={radioId}
             className={cn(
-              'text-sm font-medium cursor-pointer',
-              checked
-                ? 'text-gray-900 dark:text-white'
-                : 'text-gray-600 dark:text-gray-400',
-              disabled && 'opacity-50 cursor-not-allowed'
+              'text-sm text-gray-700 dark:text-gray-300',
+              disabled && 'cursor-not-allowed opacity-50'
             )}
+            onClick={() => !disabled && onChange?.(true)}
           >
             {label}
           </label>
+        )}
+        {error && (
+          <p className="text-xs text-danger-500">{error}</p>
         )}
       </div>
     );
@@ -76,59 +62,54 @@ const Radio = forwardRef(
 Radio.displayName = 'Radio';
 
 Radio.propTypes = {
+  className: PropTypes.string,
   checked: PropTypes.bool,
   onChange: PropTypes.func,
-  label: PropTypes.node,
+  label: PropTypes.string,
   disabled: PropTypes.bool,
   error: PropTypes.string,
-  className: PropTypes.string,
-  id: PropTypes.string,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  name: PropTypes.string,
 };
 
-const RadioGroup = ({ options, value, onChange, label, error, className, name }) => {
-  return (
-    <div className={cn('space-y-3', className)}>
-      {label && (
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          {label}
-        </label>
-      )}
+const RadioGroup = forwardRef(
+  ({ className, options = [], value, onChange, label, error, orientation = 'vertical' }, ref) => {
+    return (
+      <div className={cn(orientation === 'horizontal' ? 'flex gap-4' : 'space-y-2', className)} ref={ref}>
+        {label && (
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            {label}
+          </label>
+        )}
+        {options.map((option) => (
+          <Radio
+            key={option.value}
+            checked={value === option.value}
+            onChange={() => onChange?.(option.value)}
+            label={option.label}
+            disabled={option.disabled}
+          />
+        ))}
+        {error && (
+          <p className="text-xs text-danger-500">{error}</p>
+        )}
+      </div>
+    );
+  }
+);
 
-      {options.map((option) => (
-        <Radio
-          key={option.value}
-          name={name}
-          value={option.value}
-          checked={value === option.value}
-          onChange={() => onChange?.(option.value)}
-          label={option.label}
-          disabled={option.disabled}
-        />
-      ))}
-
-      {error && (
-        <p className="text-sm text-danger-600 dark:text-danger-400">{error}</p>
-      )}
-    </div>
-  );
-};
+RadioGroup.displayName = 'RadioGroup';
 
 RadioGroup.propTypes = {
-  options: PropTypes.arrayOf(
-    PropTypes.shape({
-      value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-      label: PropTypes.node.isRequired,
-      disabled: PropTypes.bool,
-    })
-  ).isRequired,
+  className: PropTypes.string,
+  options: PropTypes.arrayOf(PropTypes.shape({
+    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    label: PropTypes.string.isRequired,
+    disabled: PropTypes.bool,
+  })),
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   onChange: PropTypes.func,
   label: PropTypes.string,
   error: PropTypes.string,
-  className: PropTypes.string,
-  name: PropTypes.string,
+  orientation: PropTypes.oneOf(['vertical', 'horizontal']),
 };
 
 export { Radio, RadioGroup };

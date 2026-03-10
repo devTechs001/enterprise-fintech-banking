@@ -1,2 +1,2 @@
-export { Spinner } from './Spinner';
-export { default as SpinnerDefault } from './Spinner';
+export { Spinner, Skeleton } from './Spinner';
+export default Spinner;

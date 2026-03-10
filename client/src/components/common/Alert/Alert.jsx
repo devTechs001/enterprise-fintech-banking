@@ -1,76 +1,108 @@
+import { forwardRef } from 'react';
 import PropTypes from 'prop-types';
+import { cva } from 'class-variance-authority';
+import { AlertCircle, CheckCircle, XCircle, Info } from 'lucide-react';
 import { cn } from '@/utils/helpers';
-import { AlertCircle, CheckCircle, Info, XCircle, X } from 'lucide-react';
-import { Button } from '@/components/common/Button';
+import { Button } from '../Button';
 
-const Alert = ({
-  children,
-  variant = 'info',
-  title,
-  icon,
-  dismissible = false,
-  onDismiss,
-  className,
-  ...props
-}) => {
-  const variantClasses = {
-    info: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200',
-    success: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200',
-    warning: 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200',
-    error: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200',
-  };
+const alertVariants = cva(
+  'relative w-full rounded-lg border p-4 flex gap-3',
+  {
+    variants: {
+      variant: {
+        default: 'bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-100',
+        info: 'bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-100',
+        success: 'bg-success-50 border-success-200 text-success-900 dark:bg-success-900/20 dark:border-success-800 dark:text-success-100',
+        warning: 'bg-warning-50 border-warning-200 text-warning-900 dark:bg-warning-900/20 dark:border-warning-800 dark:text-warning-100',
+        danger: 'bg-danger-50 border-danger-200 text-danger-900 dark:bg-danger-900/20 dark:border-danger-800 dark:text-danger-100',
+        error: 'bg-danger-50 border-danger-200 text-danger-900 dark:bg-danger-900/20 dark:border-danger-800 dark:text-danger-100',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+    },
+  }
+);
 
-  const variantIcons = {
-    info: Info,
-    success: CheckCircle,
-    warning: AlertCircle,
-    error: XCircle,
-  };
-
-  const Icon = icon || variantIcons[variant];
-
-  return (
-    <div
-      className={cn(
-        'flex items-start gap-3 p-4 rounded-lg border',
-        variantClasses[variant],
-        className
-      )}
-      role="alert"
-      {...props}
-    >
-      {Icon && (
-        <Icon className="w-5 h-5 flex-shrink-0 mt-0.5" />
-      )}
-      <div className="flex-1">
-        {title && (
-          <h4 className="font-medium mb-1">{title}</h4>
-        )}
-        <div className="text-sm opacity-90">{children}</div>
-      </div>
-      {dismissible && (
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={onDismiss}
-          className="opacity-50 hover:opacity-100 -mr-2 -mt-2"
-        >
-          <X className="w-4 h-4" />
-        </Button>
-      )}
-    </div>
-  );
+const iconMap = {
+  default: Info,
+  info: Info,
+  success: CheckCircle,
+  warning: AlertCircle,
+  danger: XCircle,
+  error: XCircle,
 };
+
+const Alert = forwardRef(
+  (
+    {
+      className,
+      variant,
+      title,
+      description,
+      icon: CustomIcon,
+      action,
+      onDismiss,
+      ...props
+    },
+    ref
+  ) => {
+    const Icon = CustomIcon || iconMap[variant] || iconMap.default;
+
+    return (
+      <div
+        ref={ref}
+        role="alert"
+        className={cn(alertVariants({ variant }), className)}
+        {...props}
+      >
+        <Icon className="h-5 w-5 flex-shrink-0" />
+        <div className="flex-1 space-y-1">
+          {title && (
+            <p className="font-medium text-sm">{title}</p>
+          )}
+          {description && (
+            <p className="text-sm opacity-90">{description}</p>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {action && (
+            <Button
+              size="sm"
+              variant={variant === 'danger' || variant === 'error' ? 'danger' : 'primary'}
+              {...action}
+            />
+          )}
+          {onDismiss && (
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              onClick={onDismiss}
+              className="h-6 w-6"
+            >
+              <XCircle className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </div>
+    );
+  }
+);
+
+Alert.displayName = 'Alert';
 
 Alert.propTypes = {
-  children: PropTypes.node.isRequired,
-  variant: PropTypes.oneOf(['info', 'success', 'warning', 'error']),
-  title: PropTypes.node,
-  icon: PropTypes.elementType,
-  dismissible: PropTypes.bool,
-  onDismiss: PropTypes.func,
   className: PropTypes.string,
+  variant: PropTypes.oneOf(['default', 'info', 'success', 'warning', 'danger', 'error']),
+  title: PropTypes.string,
+  description: PropTypes.string,
+  icon: PropTypes.elementType,
+  action: PropTypes.shape({
+    children: PropTypes.node,
+    onClick: PropTypes.func,
+  }),
+  onDismiss: PropTypes.func,
 };
 
-export { Alert };
+export { Alert, alertVariants };
 export default Alert;

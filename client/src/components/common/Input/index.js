@@ -1,2 +1,2 @@
-export { Input } from './Input';
-export { default } from './Input';
+export { Input, inputVariants } from './Input';
+export default Input;

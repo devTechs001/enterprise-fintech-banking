@@ -1,2 +1,2 @@
-export { ToastProvider, useToast } from './Toast';
-export { default as ToastDefault } from './Toast';
+export { Toast, ToastContainer, toastVariants } from './Toast';
+export default Toast;
