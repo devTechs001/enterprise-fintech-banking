@@ -1,9 +1,9 @@
-import httpStatus from 'http-status';
-import catchAsync from '@/utils/catchAsync';
-import { authService, tokenService, emailService } from '@/services';
-import { ApiResponse } from '@/utils/apiResponse';
-import { AuditService } from '@/services/audit.service';
-import config from '@/config';
+const httpStatus = require('http-status');
+const catchAsync = require('@/utils/catchAsync');
+const { authService, tokenService, emailService } = require('@/services');
+const { ApiResponse } = require('@/utils/apiResponse');
+const { AuditService } = require('@/services/audit.service');
+const config = require('@/config');
 
 /**
  * Register new user
@@ -66,7 +66,7 @@ const login = catchAsync(async (req, res) => {
   // Check if MFA is enabled
   if (user.mfaEnabled) {
     const tempToken = await tokenService.generateTempToken(user.id);
-
+    
     await AuditService.log({
       action: 'MFA_REQUIRED',
       userId: user.id,
@@ -229,7 +229,7 @@ const forgotPassword = catchAsync(async (req, res) => {
   const { email } = req.body;
 
   const user = await authService.getUserByEmail(email);
-
+  
   if (user) {
     const resetToken = await tokenService.generatePasswordResetToken(user.id);
     await emailService.sendPasswordResetEmail(user.email, resetToken);
@@ -338,7 +338,7 @@ const changePassword = catchAsync(async (req, res) => {
   });
 });
 
-export {
+module.exports = {
   register,
   login,
   verifyMfa,

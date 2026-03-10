@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Eye,
-  EyeOff,
-  MoreVertical,
-  ArrowUpRight,
+import { 
+  Eye, 
+  EyeOff, 
+  MoreVertical, 
+  ArrowUpRight, 
   ArrowDownLeft,
   Copy,
   ExternalLink,
   Settings,
-  Download,
+  Download
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/utils/helpers';
@@ -22,24 +22,28 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from '@/components/common/Dropdown';
-import { useToast } from '@/components/common/Toast';
+import { useToast } from '@/hooks/ui/useToast';
 
 const accountTypeStyles = {
   checking: {
     gradient: 'from-blue-600 via-blue-700 to-indigo-800',
     icon: '💳',
+    pattern: 'opacity-10',
   },
   savings: {
     gradient: 'from-emerald-600 via-emerald-700 to-teal-800',
     icon: '🏦',
+    pattern: 'opacity-10',
   },
   investment: {
     gradient: 'from-purple-600 via-purple-700 to-pink-800',
     icon: '📈',
+    pattern: 'opacity-10',
   },
   credit: {
     gradient: 'from-amber-500 via-orange-600 to-red-700',
     icon: '💎',
+    pattern: 'opacity-10',
   },
 };
 
@@ -62,6 +66,7 @@ const AccountCard = ({
     accountType = 'checking',
     balance,
     currency = 'USD',
+    lastTransaction,
     status,
   } = account;
 
@@ -101,8 +106,33 @@ const AccountCard = ({
     >
       {/* Background Pattern */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
-        <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-black/10 blur-2xl" />
+        <div className={cn(
+          'absolute -right-8 -top-8 h-40 w-40 rounded-full',
+          'bg-white/10 blur-2xl'
+        )} />
+        <div className={cn(
+          'absolute -bottom-8 -left-8 h-32 w-32 rounded-full',
+          'bg-black/10 blur-2xl'
+        )} />
+        {/* Card Pattern */}
+        <svg
+          className="absolute inset-0 h-full w-full opacity-5"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <pattern
+              id={`pattern-${id}`}
+              x="0"
+              y="0"
+              width="40"
+              height="40"
+              patternUnits="userSpaceOnUse"
+            >
+              <circle cx="20" cy="20" r="1" fill="white" />
+            </pattern>
+          </defs>
+          <rect fill={`url(#pattern-${id})`} width="100%" height="100%" />
+        </svg>
       </div>
 
       {/* Content */}
@@ -112,8 +142,12 @@ const AccountCard = ({
           <div className="flex items-center gap-3">
             <span className="text-2xl">{styles.icon}</span>
             <div>
-              <h3 className="font-semibold text-white text-lg">{accountName}</h3>
-              <p className="text-white/70 text-sm capitalize">{accountType} Account</p>
+              <h3 className="font-semibold text-white text-lg">
+                {accountName}
+              </h3>
+              <p className="text-white/70 text-sm capitalize">
+                {accountType} Account
+              </p>
             </div>
           </div>
 
@@ -163,7 +197,11 @@ const AccountCard = ({
               }}
               className="text-white/70 hover:text-white transition-colors"
             >
-              {showBalance ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+              {showBalance ? (
+                <Eye className="h-4 w-4" />
+              ) : (
+                <EyeOff className="h-4 w-4" />
+              )}
             </button>
           </div>
           <AnimatePresence mode="wait">
@@ -226,14 +264,12 @@ const AccountCard = ({
 
         {/* Status Indicator */}
         {status && (
-          <div
-            className={cn(
-              'absolute top-4 right-4 px-2 py-0.5 rounded-full text-xs font-medium',
-              status === 'active' && 'bg-green-500/20 text-green-300',
-              status === 'frozen' && 'bg-red-500/20 text-red-300',
-              status === 'pending' && 'bg-yellow-500/20 text-yellow-300'
-            )}
-          >
+          <div className={cn(
+            'absolute top-4 right-4 px-2 py-0.5 rounded-full text-xs font-medium',
+            status === 'active' && 'bg-green-500/20 text-green-300',
+            status === 'frozen' && 'bg-red-500/20 text-red-300',
+            status === 'pending' && 'bg-yellow-500/20 text-yellow-300'
+          )}>
             {status}
           </div>
         )}
@@ -250,6 +286,7 @@ AccountCard.propTypes = {
     accountType: PropTypes.oneOf(['checking', 'savings', 'investment', 'credit']),
     balance: PropTypes.number.isRequired,
     currency: PropTypes.string,
+    lastTransaction: PropTypes.object,
     status: PropTypes.oneOf(['active', 'frozen', 'pending']),
   }).isRequired,
   className: PropTypes.string,
@@ -260,5 +297,4 @@ AccountCard.propTypes = {
   showActions: PropTypes.bool,
 };
 
-export { AccountCard };
 export default AccountCard;

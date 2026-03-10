@@ -1,7 +1,7 @@
-import { DataTypes, Model } from 'sequelize';
-import bcrypt from 'bcryptjs';
-import { sequelize } from '@/database/connection';
-import { ACCOUNT_STATUS, USER_ROLES } from '@/constants';
+const { DataTypes, Model } = require('sequelize');
+const bcrypt = require('bcryptjs');
+const { sequelize } = require('@/database/connection');
+const { ACCOUNT_STATUS, USER_ROLES } = require('@/constants');
 
 class User extends Model {
   // Instance methods
@@ -149,70 +149,3 @@ User.init(
     },
     riskLevel: {
       type: DataTypes.ENUM('low', 'medium', 'high'),
-      defaultValue: 'low',
-    },
-    lastLoginAt: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-    lastLoginIp: {
-      type: DataTypes.STRING(45),
-      allowNull: true,
-    },
-    preferences: {
-      type: DataTypes.JSONB,
-      defaultValue: {
-        language: 'en',
-        currency: 'USD',
-        timezone: 'UTC',
-        notifications: {
-          email: true,
-          sms: false,
-          push: true,
-        },
-      },
-    },
-    metadata: {
-      type: DataTypes.JSONB,
-      defaultValue: {},
-    },
-  },
-  {
-    sequelize,
-    modelName: 'User',
-    tableName: 'users',
-    timestamps: true,
-    indexes: [
-      { fields: ['email'], unique: true },
-      { fields: ['phoneNumber'] },
-      { fields: ['status'] },
-      { fields: ['role'] },
-      { fields: ['createdAt'] },
-    ],
-    hooks: {
-      beforeCreate: async (user) => {
-        if (user.password) {
-          const salt = await bcrypt.genSalt(12);
-          user.password = await bcrypt.hash(user.password, salt);
-        }
-      },
-      beforeUpdate: async (user) => {
-        if (user.changed('password')) {
-          const salt = await bcrypt.genSalt(12);
-          user.password = await bcrypt.hash(user.password, salt);
-        }
-      },
-    },
-  }
-);
-
-// Static methods
-User.findByEmail = async (email) => {
-  return User.findOne({ where: { email } });
-};
-
-User.findByPhone = async (phoneNumber) => {
-  return User.findOne({ where: { phoneNumber } });
-};
-
-export default User;

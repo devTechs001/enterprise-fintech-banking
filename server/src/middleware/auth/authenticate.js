@@ -1,10 +1,10 @@
-import httpStatus from 'http-status';
-import jwt from 'jsonwebtoken';
-import { promisify } from 'util';
-import config from '@/config';
-import { ApiResponse } from '@/utils/apiResponse';
-import { User, Session } from '@/database/models';
-import { redis } from '@/config/redis.config';
+const httpStatus = require('http-status');
+const jwt = require('jsonwebtoken');
+const { promisify } = require('util');
+const config = require('@/config');
+const { ApiResponse } = require('@/utils/apiResponse');
+const { User, Session } = require('@/database/models');
+const { redis } = require('@/config/redis.config');
 
 const verifyJwt = promisify(jwt.verify);
 
@@ -16,7 +16,7 @@ const authenticate = async (req, res, next) => {
   try {
     // Get token from header
     const authHeader = req.headers.authorization;
-
+    
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return ApiResponse.error(
         res,
@@ -70,7 +70,7 @@ const authenticate = async (req, res, next) => {
 
     // Get user from cache or database
     let user = await redis.get(`user:${decoded.sub}`);
-
+    
     if (user) {
       user = JSON.parse(user);
     } else {
@@ -136,7 +136,7 @@ const authenticate = async (req, res, next) => {
  */
 const optionalAuthenticate = async (req, res, next) => {
   const authHeader = req.headers.authorization;
-
+  
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return next();
   }
@@ -144,12 +144,12 @@ const optionalAuthenticate = async (req, res, next) => {
   try {
     const token = authHeader.split(' ')[1];
     const decoded = await verifyJwt(token, config.jwt.accessSecret);
-
+    
     if (decoded.type === 'access') {
       const user = await User.findByPk(decoded.sub, {
         attributes: { exclude: ['password'] },
       });
-
+      
       if (user && user.status === 'active') {
         req.user = user;
         req.tokenInfo = { token, ...decoded };
@@ -168,7 +168,7 @@ const optionalAuthenticate = async (req, res, next) => {
 const authenticateRefreshToken = async (req, res, next) => {
   try {
     const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
-
+    
     if (!refreshToken) {
       return ApiResponse.error(
         res,
@@ -179,7 +179,7 @@ const authenticateRefreshToken = async (req, res, next) => {
 
     // Verify token
     const decoded = await verifyJwt(refreshToken, config.jwt.refreshSecret);
-
+    
     if (decoded.type !== 'refresh') {
       return ApiResponse.error(
         res,
@@ -236,7 +236,7 @@ const authenticateRefreshToken = async (req, res, next) => {
   }
 };
 
-export {
+module.exports = {
   authenticate,
   optionalAuthenticate,
   authenticateRefreshToken,
