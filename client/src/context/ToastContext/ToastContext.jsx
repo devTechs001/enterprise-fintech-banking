@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 
-const ToastContext = createContext(null);
+export const ToastContext = createContext(null);
 
 export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);

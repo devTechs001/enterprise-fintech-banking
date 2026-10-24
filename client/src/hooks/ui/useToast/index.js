@@ -1,1 +1,2 @@
-export { default, ToastProvider, useToast } from './useToast';
+export { default, useToast } from './useToast';
+export { ToastProvider } from '@/context/ToastContext';

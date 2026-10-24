@@ -86,6 +86,35 @@ export const formatDateTime = (date) => {
 };
 
 /**
+ * Format a date as a relative time string (e.g. "2 hours ago", "in 3 days")
+ * @param {Date|string} date - Date to format
+ * @returns {string} Relative time string
+ */
+export const formatRelativeTime = (date) => {
+  if (!date) return '';
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const diffInSeconds = Math.round((dateObj.getTime() - Date.now()) / 1000);
+
+  const units = [
+    ['year', 365 * 24 * 60 * 60],
+    ['month', 30 * 24 * 60 * 60],
+    ['week', 7 * 24 * 60 * 60],
+    ['day', 24 * 60 * 60],
+    ['hour', 60 * 60],
+    ['minute', 60],
+    ['second', 1],
+  ];
+
+  const formatter = new Intl.RelativeTimeFormat('en-US', { numeric: 'auto' });
+  for (const [unit, secondsInUnit] of units) {
+    if (Math.abs(diffInSeconds) >= secondsInUnit || unit === 'second') {
+      return formatter.format(Math.round(diffInSeconds / secondsInUnit), unit);
+    }
+  }
+  return formatter.format(0, 'second');
+};
+
+/**
  * Format phone number
  * @param {string} phone - Phone number to format
  * @returns {string} Formatted phone number

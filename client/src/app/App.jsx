@@ -1,5 +1,5 @@
 import AppProviders from './AppProviders';
-import AppRoutes from './routes';
+import AppRoutes from '../routes';
 
 /**
  * Main App component

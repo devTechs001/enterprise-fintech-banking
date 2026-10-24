@@ -22,7 +22,7 @@ import {
   MessageSquare,
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { HeaderLogo } from './Header/HeaderLogo';
+import { HeaderLogo } from '../Header/HeaderLogo';
 import { SidebarItem } from './SidebarItem';
 import { SidebarGroup } from './SidebarGroup';
 import { SidebarFooter } from './SidebarFooter';
