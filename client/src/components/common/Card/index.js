@@ -9,4 +9,4 @@ export {
   CardImage,
 } from './Card';
 
-export default Card;
+export { default } from './Card';

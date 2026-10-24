@@ -1,2 +1,2 @@
 export { Toast, ToastContainer, toastVariants } from './Toast';
-export default Toast;
+export { default } from './Toast';
