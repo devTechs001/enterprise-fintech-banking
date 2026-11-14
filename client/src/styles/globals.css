@@ -1,24 +1,17 @@
+/*
+ * Fonts: Inter is loaded from Google Fonts in index.html. The previous
+ * self-hosted @font-face rules referenced /fonts/*.woff2 files that were never
+ * committed, so every page rendered with a fallback font and the build emitted
+ * unresolved-asset warnings. If you want self-hosted fonts, add the woff2 files
+ * under client/public/fonts/ and restore the @font-face blocks.
+ */
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
 /* Custom Fonts */
 @layer base {
-  @font-face {
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 100 900;
-    font-display: swap;
-    src: url('/fonts/Inter/Inter-Variable.woff2') format('woff2');
-  }
 
-  @font-face {
-    font-family: 'Plus Jakarta Sans';
-    font-style: normal;
-    font-weight: 200 800;
-    font-display: swap;
-    src: url('/fonts/PlusJakartaSans/PlusJakartaSans-Variable.woff2') format('woff2');
-  }
 }
 
 /* Base Styles */

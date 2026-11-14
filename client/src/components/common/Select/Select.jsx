@@ -1,4 +1,4 @@
-import { forwardRef, useState } from 'react';
+import { forwardRef, useId, useState } from 'react';
 import PropTypes from 'prop-types';
 import { ChevronDown, Check, Search, X } from 'lucide-react';
 import { cn } from '@/utils/helpers';
@@ -18,10 +18,17 @@ const Select = forwardRef(
       label,
       error,
       size = 'md',
+      name,
+      id,
       ...props
     },
     ref
   ) => {
+    const generatedId = useId();
+    const selectId = id || generatedId;
+    const labelId = `${selectId}-label`;
+    const listboxId = `${selectId}-listbox`;
+    const errorId = `${selectId}-error`;
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -46,13 +53,29 @@ const Select = forwardRef(
     return (
       <div className={cn('relative w-full', className)} ref={ref} {...props}>
         {label && (
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label id={labelId} htmlFor={selectId} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             {label}
           </label>
         )}
-        
+
+        {/* A hidden native select keeps the value in the form payload and gives
+            assistive tech a real labelled control to announce. */}
+        {name && (
+          <select name={name} value={value ?? ''} readOnly tabIndex={-1} aria-hidden="true" className="sr-only">
+            <option value={value ?? ''} />
+          </select>
+        )}
+
         <button
           type="button"
+          id={selectId}
+          role="combobox"
+          aria-controls={listboxId}
+          aria-expanded={isOpen}
+          aria-haspopup="listbox"
+          aria-labelledby={label ? labelId : undefined}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? errorId : undefined}
           onClick={() => !disabled && setIsOpen(!isOpen)}
           disabled={disabled}
           className={cn(

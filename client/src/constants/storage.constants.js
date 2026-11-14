@@ -1,11 +1,12 @@
 /**
  * Storage keys constants
  */
+/**
+ * SECURITY: tokens are deliberately absent. The access token lives in memory and
+ * the refresh token in an HttpOnly cookie, so neither is readable via XSS.
+ * Financial payloads are not cached in web storage either.
+ */
 const STORAGE_KEYS = {
-  // Auth
-  ACCESS_TOKEN: 'access_token',
-  REFRESH_TOKEN: 'refresh_token',
-  USER: 'user',
   
   // Theme
   THEME: 'theme',
@@ -15,16 +16,11 @@ const STORAGE_KEYS = {
   CURRENCY: 'currency',
   
   // Session
-  SESSION_ID: 'session_id',
   LAST_ACTIVITY: 'last_activity',
   
   // Feature flags
   FEATURE_FLAGS: 'feature_flags',
   
-  // Cache
-  ACCOUNTS_CACHE: 'accounts_cache',
-  TRANSACTIONS_CACHE: 'transactions_cache',
-  CARDS_CACHE: 'cards_cache',
 };
 
 /**

@@ -43,6 +43,7 @@ const Alert = forwardRef(
       icon: CustomIcon,
       action,
       onDismiss,
+      children,
       ...props
     },
     ref
@@ -64,6 +65,9 @@ const Alert = forwardRef(
           {description && (
             <p className="text-sm opacity-90">{description}</p>
           )}
+          {/* Children were previously ignored, so any <Alert>text</Alert> usage
+              rendered an empty box. */}
+          {children}
         </div>
         <div className="flex items-center gap-2">
           {action && (
@@ -96,6 +100,7 @@ Alert.propTypes = {
   variant: PropTypes.oneOf(['default', 'info', 'success', 'warning', 'danger', 'error']),
   title: PropTypes.string,
   description: PropTypes.string,
+  children: PropTypes.node,
   icon: PropTypes.elementType,
   action: PropTypes.shape({
     children: PropTypes.node,

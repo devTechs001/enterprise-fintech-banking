@@ -12,6 +12,7 @@ import {
   FileText,
   Settings,
   HelpCircle,
+  Bell,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -19,7 +20,6 @@ import {
   Users,
   PieChart,
   Shield,
-  MessageSquare,
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { HeaderLogo } from '../Header/HeaderLogo';
@@ -29,31 +29,43 @@ import { SidebarFooter } from './SidebarFooter';
 import { Button } from '@/components/common/Button';
 import { useAuth } from '@/context/AuthContext';
 
+/**
+ * Navigation.
+ *
+ * Only routes that actually exist are linked. The previous list pointed at
+ * /accounts, /payments, /cards, /investments, /loans, /analytics, /beneficiaries,
+ * /settings and /help — none of which were mounted, so every one of them landed
+ * on the 404 page. Unbuilt areas are marked `soon` and rendered inert.
+ */
 const mainNavItems = [
   { icon: LayoutDashboard, label: 'Dashboard', to: '/dashboard' },
-  { icon: Wallet, label: 'Accounts', to: '/accounts' },
   { icon: ArrowRightLeft, label: 'Transfers', to: '/transfers' },
-  { icon: Receipt, label: 'Payments', to: '/payments' },
-  { icon: CreditCard, label: 'Cards', to: '/cards' },
-  { icon: TrendingUp, label: 'Investments', to: '/investments' },
-  { icon: FileText, label: 'Loans', to: '/loans' },
+  { icon: Shield, label: 'Security', to: '/security' },
 ];
 
 const secondaryNavItems = [
-  { icon: PieChart, label: 'Analytics', to: '/analytics' },
-  { icon: Users, label: 'Beneficiaries', to: '/beneficiaries' },
-  { icon: Shield, label: 'Security', to: '/settings/security' },
-  { icon: MessageSquare, label: 'Support', to: '/support' },
+  { icon: Bell, label: 'Notifications', to: '/notifications' },
+  { icon: Wallet, label: 'Accounts', soon: true },
+  { icon: Receipt, label: 'Payments', soon: true },
+  { icon: CreditCard, label: 'Cards', soon: true },
+  { icon: TrendingUp, label: 'Investments', soon: true },
+  { icon: FileText, label: 'Loans', soon: true },
+  { icon: PieChart, label: 'Analytics', soon: true },
+  { icon: Users, label: 'Beneficiaries', soon: true },
 ];
 
 const bottomNavItems = [
-  { icon: Settings, label: 'Settings', to: '/settings' },
-  { icon: HelpCircle, label: 'Help Center', to: '/help' },
+  { icon: Settings, label: 'Settings', soon: true },
+  { icon: HelpCircle, label: 'Help Center', soon: true },
 ];
 
 const Sidebar = ({ isOpen, isCollapsed, onToggle, onCollapse }) => {
   const location = useLocation();
   const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout?.();
+  };
 
   const isActive = (to) => {
     return location.pathname.startsWith(to);
@@ -110,11 +122,12 @@ const Sidebar = ({ isOpen, isCollapsed, onToggle, onCollapse }) => {
           <SidebarGroup title={!isCollapsed ? 'More' : null}>
             {secondaryNavItems.map((item) => (
               <SidebarItem
-                key={item.to}
+                key={item.label}
                 icon={item.icon}
                 label={item.label}
-                to={item.to}
-                isActive={isActive(item.to)}
+                to={item.soon ? undefined : item.to}
+                disabled={item.soon}
+                isActive={item.to ? isActive(item.to) : false}
                 collapsed={isCollapsed}
               />
             ))}
@@ -125,11 +138,11 @@ const Sidebar = ({ isOpen, isCollapsed, onToggle, onCollapse }) => {
         <div className="border-t border-gray-200 dark:border-gray-800 py-4">
           {bottomNavItems.map((item) => (
             <SidebarItem
-              key={item.to}
+              key={item.label}
               icon={item.icon}
               label={item.label}
-              to={item.to}
-              isActive={isActive(item.to)}
+              disabled={item.soon}
+              isActive={false}
               collapsed={isCollapsed}
             />
           ))}
@@ -138,7 +151,7 @@ const Sidebar = ({ isOpen, isCollapsed, onToggle, onCollapse }) => {
           <SidebarItem
             icon={LogOut}
             label="Logout"
-            onClick={logout}
+            onClick={handleLogout}
             isActive={false}
             collapsed={isCollapsed}
             className="text-danger-600 hover:text-danger-700"

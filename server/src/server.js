@@ -1,109 +1,119 @@
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import compression from 'compression';
-import cookieParser from 'cookie-parser';
-import rateLimit from 'express-rate-limit';
-import config from './config/index.js';
-import { testConnection } from './database/connection.js';
+import http from 'node:http';
+import { pathToFileURL } from 'node:url';
+import crypto from 'node:crypto';
 
-// Import middleware
-import { errorHandler } from './middleware/error/errorHandler.js';
-import { requestLogger } from './middleware/logging/requestLogger.js';
+import config from '#config/index.js';
+import logger from '#logger.js';
+import { createApp } from '#config/app.js';
+import { initializeDatabase, closeConnection } from '#database/connection.js';
+import { closeRedis } from '#config/redis.config.js';
 
-// Import routes
-import authRoutes from './api/v1/auth/auth.routes.js';
+/**
+ * Process entrypoint.
+ *
+ * DEFECTS FIXED
+ * -------------
+ *  1. `initializeDatabase()` was never called. The process bound a port and
+ *     reported "listening" with no database connection, then returned 500 for
+ *     every request.
+ *  2. No signal handling. SIGTERM killed the process mid-request, which for a
+ *     transfer means a debit committed and a credit that never happened.
+ *  3. No `unhandledRejection` / `uncaughtException` handlers, so one stray
+ *     promise rejection in a background task took the whole service down without
+ *     a trace.
+ *  4. Security-critical config was never validated at boot — see `config/index.js`
+ *     for the JWT secret fail-fast.
+ */
 
-const app = express();
+const SHUTDOWN_TIMEOUT_MS = 10000;
 
-// Security middleware
-app.use(helmet());
-app.use(cors({
-  origin: config.cors.origin,
-  credentials: config.cors.credentials,
-}));
+const start = async () => {
+  // Fails fast when NODE_ENV=production and a secret is missing or weak.
+  const app = createApp();
+  const server = http.createServer(app);
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: config.rateLimit.windowMs,
-  max: config.rateLimit.max,
-  message: 'Too many requests from this IP, please try again later.',
-});
-app.use('/api', limiter);
+  await initializeDatabase();
 
-// Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(cookieParser());
-app.use(compression());
-
-// Request logging
-app.use(requestLogger);
-
-// Health check
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'OK',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-  });
-});
-
-// API Routes
-app.use('/api/v1/auth', authRoutes);
-
-// API documentation
-app.get('/api', (req, res) => {
-  res.json({
-    name: 'Enterprise Fintech Banking API',
-    version: '1.0.0',
-    endpoints: {
-      auth: '/api/v1/auth',
-      accounts: '/api/v1/accounts',
-      transactions: '/api/v1/transactions',
-      cards: '/api/v1/cards',
-      loans: '/api/v1/loans',
-    },
-  });
-});
-
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Route not found',
-  });
-});
-
-// Error handler
-app.use(errorHandler);
-
-// Start server
-const startServer = async () => {
-  try {
-    // Test database connection
-    await testConnection();
-    
-    app.listen(config.server.port, () => {
-      console.log(`
-╔════════════════════════════════════════════════════════╗
-║                                                        ║
-║   🏦 Enterprise Fintech Banking Server                 ║
-║                                                        ║
-║   Server running on port ${config.server.port}                    ║
-║   Environment: ${config.env}                                    ║
-║   Health check: http://localhost:${config.server.port}/health          ║
-║   API: http://localhost:${config.server.port}/api                      ║
-║                                                        ║
-╚════════════════════════════════════════════════════════╝
-      `);
+  server.listen(config.server.port, config.server.host, () => {
+    logger.info('Server listening', {
+      port: config.server.port,
+      host: config.server.host,
+      env: config.env,
+      pid: process.pid,
     });
-  } catch (error) {
-    console.error('Failed to start server:', error);
+    if (!config.isProduction) {
+      logger.warn('Running in development mode. Do not use this configuration in production.');
+    }
+  });
+
+  server.keepAliveTimeout = 65000; // must exceed the load balancer's idle timeout
+  server.headersTimeout = 66000;
+  server.requestTimeout = 30000;
+
+  let shuttingDown = false;
+  const shutdown = async (signal) => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    logger.info('Shutting down gracefully', { signal });
+
+    const forceExit = setTimeout(() => {
+      logger.error('Graceful shutdown timed out; forcing exit');
+      process.exit(1);
+    }, SHUTDOWN_TIMEOUT_MS);
+    forceExit.unref();
+
+    // Stop accepting new work, let in-flight requests finish, then close handles.
+    server.close(async () => {
+      try {
+        await closeRedis();
+        await closeConnection();
+        logger.info('Shutdown complete');
+        process.exit(0);
+      } catch (error) {
+        logger.error('Error during shutdown', { message: error.message });
+        process.exit(1);
+      }
+    });
+  };
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+
+  process.on('unhandledRejection', (reason) => {
+    // Log and keep serving: an unawaited promise in a background task should not
+    // cost the process. Anything affecting a request is handled by the middleware.
+    logger.error('Unhandled promise rejection', {
+      message: reason instanceof Error ? reason.message : String(reason),
+      stack: reason instanceof Error ? reason.stack : undefined,
+    });
+  });
+
+  process.on('uncaughtException', (error) => {
+    // Here the process state is unknown, so log and exit — the orchestrator
+    // restarts it. Exiting is correct; carrying on with corrupted state is not.
+    logger.error('Uncaught exception; exiting', { message: error.message, stack: error.stack });
     process.exit(1);
-  }
+  });
+
+  return server;
 };
 
-startServer();
+/**
+ * Only boot when this file is the entrypoint.
+ *
+ * `start()` ran unconditionally at module scope, so merely importing the module —
+ * from a test, a health-check harness or a smoke script — opened a database
+ * connection and called `process.exit(1)` when it failed. Guarding on the
+ * entrypoint makes the server importable and therefore testable.
+ */
+const isEntrypoint = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 
-export default app;
+if (isEntrypoint) {
+  start().catch((error) => {
+    logger.error('Failed to start the server', { message: error.message, stack: error.stack });
+    process.exit(1);
+  });
+}
+
+export { start };
+export default start;

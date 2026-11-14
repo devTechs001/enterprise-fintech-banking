@@ -1,7 +1,7 @@
-const { DataTypes, Model } = require('sequelize');
-const { sequelize } = require('@/database/connection');
-const { TRANSACTION_TYPES, TRANSACTION_STATUS } = require('@/constants');
-const { generateTransactionId } = require('@/utils/generators');
+import { DataTypes, Model } from 'sequelize';
+import { sequelize } from '#database/connection.js';
+import { TRANSACTION_TYPES, TRANSACTION_STATUS } from '#constants/index.js';
+import { generateTransactionId } from '#utils/generators/index.js';
 
 class Transaction extends Model {
   // Check if transaction can be reversed
@@ -342,30 +342,30 @@ Transaction.init(
 
 // Associations
 Transaction.associate = (models) => {
-  Transaction.belongsTo(models.User, {
+  if (models.User) Transaction.belongsTo(models.User, {
     foreignKey: 'userId',
     as: 'user',
   });
 
-  Transaction.belongsTo(models.Account, {
+  if (models.Account) Transaction.belongsTo(models.Account, {
     foreignKey: 'accountId',
     as: 'account',
   });
 
-  Transaction.belongsTo(models.Account, {
+  if (models.Account) Transaction.belongsTo(models.Account, {
     foreignKey: 'destinationAccountId',
     as: 'destinationAccount',
   });
 
-  Transaction.belongsTo(models.Beneficiary, {
+  if (models.Beneficiary) Transaction.belongsTo(models.Beneficiary, {
     foreignKey: 'beneficiaryId',
     as: 'beneficiary',
   });
 
-  Transaction.belongsTo(models.Card, {
+  if (models.Card) Transaction.belongsTo(models.Card, {
     foreignKey: 'cardId',
     as: 'card',
   });
 };
 
-module.exports = Transaction;
+export default Transaction;

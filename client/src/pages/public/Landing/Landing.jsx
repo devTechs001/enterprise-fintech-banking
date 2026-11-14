@@ -23,10 +23,10 @@ const Landing = () => {
               <a href="#contact" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Contact</a>
             </div>
             <div className="flex items-center gap-4">
-              <Link to="/auth/login">
+              <Link to="/login">
                 <Button variant="ghost">Sign In</Button>
               </Link>
-              <Link to="/auth/register">
+              <Link to="/register">
                 <Button>Get Started</Button>
               </Link>
             </div>
@@ -62,10 +62,10 @@ const Landing = () => {
             transition={{ delay: 0.2 }}
             className="flex items-center justify-center gap-4"
           >
-            <Link to="/auth/register">
+            <Link to="/register">
               <Button size="lg" rightIcon={ArrowRight}>Open Account</Button>
             </Link>
-            <Link to="/auth/login">
+            <Link to="/login">
               <Button variant="outline" size="lg">Learn More</Button>
             </Link>
           </motion.div>
@@ -110,7 +110,7 @@ const Landing = () => {
         <div className="max-w-4xl mx-auto text-center px-4">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Ready to Get Started?</h2>
           <p className="text-gray-600 dark:text-gray-400 mb-8">Join thousands of satisfied customers today.</p>
-          <Link to="/auth/register">
+          <Link to="/register">
             <Button size="lg" rightIcon={ArrowRight}>Create Free Account</Button>
           </Link>
         </div>

@@ -1,98 +1,50 @@
-import { STORAGE_KEYS } from '@/constants/storage.constants';
-
 /**
- * Token service for managing authentication tokens
+ * Access-token store.
+ *
+ * SECURITY: the access token is held in module memory only. It is never written
+ * to localStorage or sessionStorage, so a cross-site scripting bug cannot read a
+ * long-lived credential out of web storage. The refresh token is an opaque,
+ * HttpOnly, SameSite=Strict cookie set by the API and is therefore invisible to
+ * JavaScript entirely.
+ *
+ * On a full page load there is no access token; the app performs a silent
+ * refresh (see `bootstrapSession` in AuthContext) to obtain one from the cookie.
  */
+
+let accessToken = null;
+let expiresAt = 0;
+
+const listeners = new Set();
+
+const emit = () => listeners.forEach((fn) => fn(accessToken));
+
 const tokenService = {
-  /**
-   * Get access token from storage
-   * @returns {string|null} Access token
-   */
-  getAccessToken: () => {
-    return localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
-  },
+  getAccessToken: () => accessToken,
+
+  /** @returns {boolean} true when a token is present and not past its expiry */
+  hasValidAccessToken: () => Boolean(accessToken) && Date.now() < expiresAt,
 
   /**
-   * Get refresh token from storage
-   * @returns {string|null} Refresh token
+   * @param {string} token - Opaque or JWT access token
+   * @param {number} [expiresInSeconds] - Lifetime reported by the API
    */
-  getRefreshToken: () => {
-    return localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+  setAccessToken: (token, expiresInSeconds = 900) => {
+    accessToken = token || null;
+    // Refresh 30s early so in-flight requests never race the expiry boundary.
+    expiresAt = token ? Date.now() + Math.max(0, (expiresInSeconds - 30) * 1000) : 0;
+    emit();
   },
 
-  /**
-   * Set access token
-   * @param {string} token - Access token
-   */
-  setAccessToken: (token) => {
-    localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token);
-  },
-
-  /**
-   * Set refresh token
-   * @param {string} token - Refresh token
-   */
-  setRefreshToken: (token) => {
-    localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, token);
-  },
-
-  /**
-   * Set both tokens
-   * @param {Object} tokens - Object containing accessToken and refreshToken
-   */
-  setTokens: (tokens) => {
-    if (tokens.accessToken) {
-      tokenService.setAccessToken(tokens.accessToken);
-    }
-    if (tokens.refreshToken) {
-      tokenService.setRefreshToken(tokens.refreshToken);
-    }
-  },
-
-  /**
-   * Clear access token
-   */
   clearAccessToken: () => {
-    localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+    accessToken = null;
+    expiresAt = 0;
+    emit();
   },
 
-  /**
-   * Clear refresh token
-   */
-  clearRefreshToken: () => {
-    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-  },
-
-  /**
-   * Clear all tokens
-   */
-  clearTokens: () => {
-    tokenService.clearAccessToken();
-    tokenService.clearRefreshToken();
-  },
-
-  /**
-   * Check if access token exists
-   * @returns {boolean} True if access token exists
-   */
-  hasAccessToken: () => {
-    return !!tokenService.getAccessToken();
-  },
-
-  /**
-   * Check if refresh token exists
-   * @returns {boolean} True if refresh token exists
-   */
-  hasRefreshToken: () => {
-    return !!tokenService.getRefreshToken();
-  },
-
-  /**
-   * Check if user is authenticated (has both tokens)
-   * @returns {boolean} True if authenticated
-   */
-  isAuthenticated: () => {
-    return tokenService.hasAccessToken() && tokenService.hasRefreshToken();
+  /** Subscribe to token changes; returns an unsubscribe function. */
+  subscribe: (fn) => {
+    listeners.add(fn);
+    return () => listeners.delete(fn);
   },
 };
 

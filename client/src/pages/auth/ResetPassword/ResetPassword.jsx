@@ -1,13 +1,16 @@
 import { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Lock } from 'lucide-react';
 import { AuthLayout } from '@/components/layout/AuthLayout';
 import { Input } from '@/components/common/Input';
 import { Button } from '@/components/common/Button';
 import { Alert } from '@/components/common/Alert';
+import { resetPassword } from '@/store/slices/authSlice';
 
 const ResetPassword = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
   const [password, setPassword] = useState('');
@@ -19,6 +22,14 @@ const ResetPassword = () => {
     e.preventDefault();
     setError('');
 
+    if (!token) {
+      setError('This reset link is missing its token. Request a new one.');
+      return;
+    }
+    if (password.length < 12) {
+      setError('Use at least 12 characters.');
+      return;
+    }
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -27,11 +38,12 @@ const ResetPassword = () => {
     setIsLoading(true);
 
     try {
-      // Simulate API call - replace with actual password reset using token
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      navigate('/login');
+      // Reset tokens are single-use and short-lived; the API revokes every
+      // existing session when a reset succeeds.
+      await dispatch(resetPassword({ token, password })).unwrap();
+      navigate('/login', { replace: true });
     } catch {
-      setError('Unable to reset password. The link may have expired.');
+      setError('Unable to reset password. The link may have expired — request a new one.');
     } finally {
       setIsLoading(false);
     }

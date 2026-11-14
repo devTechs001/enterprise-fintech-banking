@@ -7,7 +7,14 @@ const APP_VERSION = '1.0.0';
 /**
  * API endpoints base URL
  */
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
+/**
+ * API base URL.
+ *
+ * Defaults to a RELATIVE path so the browser talks to whatever origin served the
+ * app. An absolute `http://localhost:3000` default breaks behind a reverse proxy
+ * or preview host, because "localhost" then resolves to the visitor's machine.
+ */
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 
 /**
  * Application routes
@@ -84,12 +91,14 @@ const ROUTES = {
 /**
  * Storage keys
  */
+/**
+ * SECURITY: no ACCESS_TOKEN / REFRESH_TOKEN keys here on purpose. Credentials are
+ * held in memory (access) and an HttpOnly cookie (refresh), never in web storage.
+ */
 const STORAGE_KEYS = {
-  ACCESS_TOKEN: 'access_token',
-  REFRESH_TOKEN: 'refresh_token',
-  USER: 'user',
   THEME: 'theme',
   LANGUAGE: 'language',
+  CURRENCY: 'currency',
 };
 
 /**

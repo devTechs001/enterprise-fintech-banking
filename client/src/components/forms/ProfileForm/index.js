@@ -1,2 +1,2 @@
 export { ProfileForm } from './ProfileForm';
-export { default as ProfileFormDefault } from './ProfileForm';
+export { default } from './ProfileForm';

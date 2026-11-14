@@ -1,5 +1,4 @@
 import axiosInstance from './axiosInstance';
-import { API_BASE_URL } from '@/constants';
 
 /**
  * Auth service for authentication-related API calls
@@ -29,8 +28,8 @@ export const authService = {
    * @param {string} tempToken - Temporary token
    * @returns {Promise} MFA verification response
    */
-  verifyMfa: async (code, tempToken) => {
-    return axiosInstance.post('/auth/mfa/verify', { code, tempToken });
+  verifyMfa: async (code, challenge) => {
+    return axiosInstance.post('/auth/mfa/verify', { code, challenge });
   },
 
   /**
@@ -46,8 +45,15 @@ export const authService = {
    * @param {string} refreshToken - Refresh token
    * @returns {Promise} Token refresh response
    */
-  refreshToken: async (refreshToken) => {
-    return axiosInstance.post('/auth/refresh-token', { refreshToken });
+  /**
+   * Refresh the access token.
+   *
+   * The refresh token is an HttpOnly cookie, so it is NOT passed from
+   * JavaScript — `withCredentials` on the axios instance sends it. Keeping it out
+   * of the request body means it can never end up in a client-side log.
+   */
+  refreshToken: async () => {
+    return axiosInstance.post('/auth/refresh-token', {});
   },
 
   /**
@@ -104,7 +110,7 @@ export const authService = {
    * @returns {Promise} MFA setup response
    */
   setupMfa: async () => {
-    return axiosInstance.post('/auth/mfa/setup');
+    return axiosInstance.post('/security/mfa/setup');
   },
 
   /**
@@ -112,8 +118,12 @@ export const authService = {
    * @param {string} code - MFA code
    * @returns {Promise} MFA disable response
    */
+  enableMfa: async (code) => {
+    return axiosInstance.post('/security/mfa/enable', { code });
+  },
+
   disableMfa: async (code) => {
-    return axiosInstance.post('/auth/mfa/disable', { code });
+    return axiosInstance.post('/security/mfa/disable', { code });
   },
 };
 

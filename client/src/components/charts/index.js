@@ -1,13 +1,6 @@
-import { LineChart } from './LineChart/LineChart';
-import { BarChart } from './BarChart/BarChart';
-import { PieChart } from './PieChart/PieChart';
-import { AreaChart } from './AreaChart/AreaChart';
-import { DonutChart } from './DonutChart/DonutChart';
-
-export {
-  LineChart,
-  BarChart,
-  PieChart,
-  AreaChart,
-  DonutChart,
-};
+export { LineChart } from './LineChart/LineChart';
+export { BarChart } from './BarChart/BarChart';
+export { PieChart } from './PieChart/PieChart';
+export { AreaChart } from './AreaChart/AreaChart';
+export { DonutChart } from './DonutChart/DonutChart';
+export { ChartFrame } from './ChartFrame';
