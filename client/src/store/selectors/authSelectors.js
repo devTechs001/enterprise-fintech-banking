@@ -1,4 +1,4 @@
-import { selectAuth } from './authSlice';
+import { selectAuth } from '../slices/authSlice';
 
 /**
  * Select the current user

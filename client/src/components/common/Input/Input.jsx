@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useId } from 'react';
 import PropTypes from 'prop-types';
 import { cva } from 'class-variance-authority';
 import { cn } from '@/utils/helpers';
@@ -37,7 +37,7 @@ const Input = forwardRef(
   (
     {
       className,
-      type,
+      type = 'text',
       variant,
       size,
       fullWidth,
@@ -46,49 +46,67 @@ const Input = forwardRef(
       helperText,
       leftIcon: LeftIcon,
       rightIcon: RightIcon,
+      id,
+      required,
       ...props
     },
     ref
   ) => {
+    const generatedId = useId();
+    const inputId = id || generatedId;
+    const helperId = `${inputId}-helper`;
+    const errorId = `${inputId}-error`;
+    // An `error` string should also drive the visual state; previously callers
+    // had to remember to pass variant="error" separately, and most did not.
+    const resolvedVariant = error ? 'error' : variant;
+    const describedBy = [error ? errorId : null, helperText ? helperId : null]
+      .filter(Boolean)
+      .join(' ') || undefined;
+
     return (
       <div className={cn('space-y-1', fullWidth && 'w-full', className)}>
         {label && (
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label
+            htmlFor={inputId}
+            className="text-sm font-medium text-gray-700 dark:text-gray-300"
+          >
             {label}
+            {required && <span className="ml-0.5 text-danger-500" aria-hidden="true">*</span>}
           </label>
         )}
         <div className="relative">
           {LeftIcon && (
             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-              <LeftIcon className="h-4 w-4" />
+              <LeftIcon className="h-4 w-4" aria-hidden="true" />
             </div>
           )}
           <input
+            {...props}
+            id={inputId}
             type={type}
             ref={ref}
+            required={required}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={describedBy}
             className={cn(
-              inputVariants({ variant, size, fullWidth }),
+              inputVariants({ variant: resolvedVariant, size, fullWidth }),
               LeftIcon && 'pl-10',
               RightIcon && 'pr-10'
             )}
-            {...props}
           />
           {RightIcon && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-              <RightIcon className="h-4 w-4" />
+              <RightIcon className="h-4 w-4" aria-hidden="true" />
             </div>
           )}
         </div>
         {helperText && (
-          <p className={cn(
-            'text-xs',
-            error ? 'text-danger-500' : 'text-gray-500 dark:text-gray-400'
-          )}>
+          <p id={helperId} className={cn('text-xs', error ? 'text-danger-500' : 'text-gray-500 dark:text-gray-400')}>
             {helperText}
           </p>
         )}
         {error && (
-          <p className="text-xs text-danger-500">{error}</p>
+          <p id={errorId} role="alert" className="text-xs text-danger-500">{error}</p>
         )}
       </div>
     );
@@ -104,6 +122,7 @@ Input.propTypes = {
   size: PropTypes.oneOf(['sm', 'md', 'lg']),
   fullWidth: PropTypes.bool,
   label: PropTypes.string,
+  id: PropTypes.string,
   error: PropTypes.string,
   helperText: PropTypes.string,
   leftIcon: PropTypes.elementType,

@@ -12,6 +12,7 @@ import {
   FileText,
   Settings,
   HelpCircle,
+  Bell,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -19,7 +20,6 @@ import {
   Users,
   PieChart,
   Shield,
-  MessageSquare,
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { HeaderLogo } from '../Header/HeaderLogo';
@@ -29,21 +29,28 @@ import { SidebarFooter } from './SidebarFooter';
 import { Button } from '@/components/common/Button';
 import { useAuth } from '@/context/AuthContext';
 
+/**
+ * Navigation.
+ *
+ * Only routes that actually exist are linked. The previous list pointed at
+ * /accounts, /payments, /cards, /investments, /loans, /analytics, /beneficiaries,
+ * /settings and /help — none of which were mounted, so every one of them landed
+ * on the 404 page. Every entry now resolves to a real route; the `soon` state is
+ * retained in `SidebarItem` for future work rather than deleted, so an unbuilt
+ * area can be listed inert instead of dead-linking to a 404.
+ */
 const mainNavItems = [
   { icon: LayoutDashboard, label: 'Dashboard', to: '/dashboard' },
   { icon: Wallet, label: 'Accounts', to: '/accounts' },
   { icon: ArrowRightLeft, label: 'Transfers', to: '/transfers' },
+  { icon: Users, label: 'Beneficiaries', to: '/beneficiaries' },
   { icon: Receipt, label: 'Payments', to: '/payments' },
   { icon: CreditCard, label: 'Cards', to: '/cards' },
   { icon: TrendingUp, label: 'Investments', to: '/investments' },
   { icon: FileText, label: 'Loans', to: '/loans' },
-];
-
-const secondaryNavItems = [
   { icon: PieChart, label: 'Analytics', to: '/analytics' },
-  { icon: Users, label: 'Beneficiaries', to: '/beneficiaries' },
-  { icon: Shield, label: 'Security', to: '/settings/security' },
-  { icon: MessageSquare, label: 'Support', to: '/support' },
+  { icon: Shield, label: 'Security', to: '/security' },
+  { icon: Bell, label: 'Notifications', to: '/notifications' },
 ];
 
 const bottomNavItems = [
@@ -54,6 +61,10 @@ const bottomNavItems = [
 const Sidebar = ({ isOpen, isCollapsed, onToggle, onCollapse }) => {
   const location = useLocation();
   const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout?.();
+  };
 
   const isActive = (to) => {
     return location.pathname.startsWith(to);
@@ -105,20 +116,6 @@ const Sidebar = ({ isOpen, isCollapsed, onToggle, onCollapse }) => {
               />
             ))}
           </SidebarGroup>
-
-          {/* Secondary Navigation */}
-          <SidebarGroup title={!isCollapsed ? 'More' : null}>
-            {secondaryNavItems.map((item) => (
-              <SidebarItem
-                key={item.to}
-                icon={item.icon}
-                label={item.label}
-                to={item.to}
-                isActive={isActive(item.to)}
-                collapsed={isCollapsed}
-              />
-            ))}
-          </SidebarGroup>
         </nav>
 
         {/* Bottom Navigation */}
@@ -129,6 +126,7 @@ const Sidebar = ({ isOpen, isCollapsed, onToggle, onCollapse }) => {
               icon={item.icon}
               label={item.label}
               to={item.to}
+              disabled={item.soon}
               isActive={isActive(item.to)}
               collapsed={isCollapsed}
             />
@@ -138,7 +136,7 @@ const Sidebar = ({ isOpen, isCollapsed, onToggle, onCollapse }) => {
           <SidebarItem
             icon={LogOut}
             label="Logout"
-            onClick={logout}
+            onClick={handleLogout}
             isActive={false}
             collapsed={isCollapsed}
             className="text-danger-600 hover:text-danger-700"

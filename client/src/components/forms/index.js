@@ -1,4 +1,3 @@
-// Forms Export
 export { LoginForm } from './LoginForm/LoginForm';
 export { RegisterForm } from './RegisterForm/RegisterForm';
 export { TransferForm } from './TransferForm/TransferForm';

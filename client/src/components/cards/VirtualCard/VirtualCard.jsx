@@ -331,4 +331,5 @@ VirtualCard.propTypes = {
   className: PropTypes.string,
 };
 
+export { VirtualCard };
 export default VirtualCard;

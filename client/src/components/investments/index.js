@@ -1,11 +1,4 @@
-import { PortfolioOverview } from './PortfolioOverview/PortfolioOverview';
-import { StockChart } from './StockChart/StockChart';
-import { InvestmentCard } from './InvestmentCard/InvestmentCard';
-import { AssetAllocation } from './AssetAllocation/AssetAllocation';
-
-export {
-  PortfolioOverview,
-  StockChart,
-  InvestmentCard,
-  AssetAllocation,
-};
+export { PortfolioOverview } from './PortfolioOverview/PortfolioOverview';
+export { StockChart } from './StockChart/StockChart';
+export { InvestmentCard } from './InvestmentCard/InvestmentCard';
+export { AssetAllocation } from './AssetAllocation/AssetAllocation';

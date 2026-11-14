@@ -1,4 +1,4 @@
-import { forwardRef, useState } from 'react';
+import { forwardRef, useId, useState } from 'react';
 import PropTypes from 'prop-types';
 import { ChevronDown, Check, Search, X } from 'lucide-react';
 import { cn } from '@/utils/helpers';
@@ -18,10 +18,17 @@ const Select = forwardRef(
       label,
       error,
       size = 'md',
+      name,
+      id,
       ...props
     },
     ref
   ) => {
+    const generatedId = useId();
+    const selectId = id || generatedId;
+    const labelId = `${selectId}-label`;
+    const listboxId = `${selectId}-listbox`;
+    const errorId = `${selectId}-error`;
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -46,13 +53,30 @@ const Select = forwardRef(
     return (
       <div className={cn('relative w-full', className)} ref={ref} {...props}>
         {label && (
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label id={labelId} htmlFor={selectId} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             {label}
           </label>
         )}
-        
+
+        {/* A hidden native select keeps the value in the form payload and gives
+            assistive tech a real labelled control to announce. */}
+        {name && (
+          <select name={name} value={value ?? ''} readOnly tabIndex={-1} aria-hidden="true" className="sr-only">
+            <option value={value ?? ''} />
+          </select>
+        )}
+
         <button
           type="button"
+          id={selectId}
+          role="combobox"
+          aria-controls={listboxId}
+          aria-expanded={isOpen}
+          aria-haspopup="listbox"
+          aria-activedescendant={isOpen && selectedOption ? `${listboxId}-option-${selectedOption.value}` : undefined}
+          aria-labelledby={label ? labelId : undefined}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? errorId : undefined}
           onClick={() => !disabled && setIsOpen(!isOpen)}
           disabled={disabled}
           className={cn(
@@ -84,8 +108,21 @@ const Select = forwardRef(
           </div>
         </button>
 
+        {/* The trigger advertised `aria-controls={listboxId}` and
+            `aria-haspopup="listbox"`, but the popup carried neither the id nor the
+            role, and the choices were plain buttons with no `role="option"`. A screen
+            reader therefore announced a combobox controlling nothing and could not
+            report which choices existed or which was selected. The comment sits
+            OUTSIDE the `&&` expression: a JSX comment inside it is a syntax error,
+            because that position accepts exactly one expression. */}
         {isOpen && (
-          <div className="absolute z-50 w-full mt-1 bg-white rounded-lg border border-gray-200 shadow-lg dark:bg-gray-900 dark:border-gray-700">
+          <div
+            id={listboxId}
+            role="listbox"
+            aria-label={label || placeholder}
+            tabIndex={-1}
+            className="absolute z-50 w-full mt-1 bg-white rounded-lg border border-gray-200 shadow-lg dark:bg-gray-900 dark:border-gray-700"
+          >
             {searchable && (
               <div className="p-2 border-b border-gray-200 dark:border-gray-700">
                 <div className="relative">
@@ -110,6 +147,11 @@ const Select = forwardRef(
                   <button
                     key={option.value}
                     type="button"
+                    role="option"
+                    id={`${listboxId}-option-${option.value}`}
+                    aria-selected={value === option.value}
+                    aria-disabled={option.disabled || undefined}
+                    disabled={option.disabled}
                     onClick={() => handleSelect(option.value)}
                     className={cn(
                       'w-full flex items-center justify-between px-3 py-2 text-sm',

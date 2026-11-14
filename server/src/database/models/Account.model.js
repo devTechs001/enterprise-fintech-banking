@@ -1,7 +1,7 @@
-const { DataTypes, Model } = require('sequelize');
-const { sequelize } = require('@/database/connection');
-const { ACCOUNT_TYPES, ACCOUNT_STATUS, CURRENCIES } = require('@/constants');
-const { generateAccountNumber } = require('@/utils/generators');
+import { DataTypes, Model } from 'sequelize';
+import { sequelize } from '#database/connection.js';
+import { ACCOUNT_TYPES, ACCOUNT_STATUS, CURRENCIES } from '#constants/index.js';
+import { generateAccountNumber } from '#utils/generators/index.js';
 
 class Account extends Model {
   // Check if account can perform transactions
@@ -192,25 +192,25 @@ Account.init(
 
 // Associations
 Account.associate = (models) => {
-  Account.belongsTo(models.User, {
+  if (models.User) Account.belongsTo(models.User, {
     foreignKey: 'userId',
     as: 'user',
   });
 
-  Account.hasMany(models.Transaction, {
+  if (models.Transaction) Account.hasMany(models.Transaction, {
     foreignKey: 'accountId',
     as: 'transactions',
   });
 
-  Account.hasMany(models.Transaction, {
+  if (models.Transaction) Account.hasMany(models.Transaction, {
     foreignKey: 'destinationAccountId',
     as: 'incomingTransactions',
   });
 
-  Account.hasMany(models.Card, {
+  if (models.Card) Account.hasMany(models.Card, {
     foreignKey: 'accountId',
     as: 'cards',
   });
 };
 
-module.exports = Account;
+export default Account;

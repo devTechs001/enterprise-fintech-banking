@@ -1,12 +1,15 @@
 import { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Mail } from 'lucide-react';
 import { AuthLayout } from '@/components/layout/AuthLayout';
 import { Input } from '@/components/common/Input';
 import { Button } from '@/components/common/Button';
 import { Alert } from '@/components/common/Alert';
+import { forgotPassword } from '@/store/slices/authSlice';
 
 const ForgotPassword = () => {
+  const dispatch = useDispatch();
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -16,8 +19,9 @@ const ForgotPassword = () => {
     setIsLoading(true);
 
     try {
-      // Simulate API call - replace with actual password reset request
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // The API always answers 200 with the same copy, so a response never
+      // reveals whether the address is registered (no user enumeration).
+      await dispatch(forgotPassword(email)).unwrap();
       setStatus('success');
     } catch {
       setStatus('error');

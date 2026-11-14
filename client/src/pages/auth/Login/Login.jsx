@@ -1,103 +1,54 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { AuthLayout } from '@/components/layout/AuthLayout';
-import { Input } from '@/components/common/Input';
-import { Button } from '@/components/common/Button';
-import { Checkbox } from '@/components/common/Checkbox';
-import { Alert } from '@/components/common/Alert';
+import { Info } from 'lucide-react';
 
+import { AuthLayout } from '@/components/layout/AuthLayout';
+import { Alert } from '@/components/common/Alert';
+import { LoginForm } from '@/components/forms/LoginForm';
+import { clearError } from '@/store/slices/authSlice';
+
+const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === 'true';
+
+/**
+ * Sign-in page.
+ *
+ * The previous version simulated authentication with a `setTimeout` and then
+ * navigated to `/dashboard` without touching auth state — so any password
+ * "worked" locally and `AuthGuard` immediately bounced the user back to
+ * `/login`. It now renders the real `LoginForm`, which dispatches to the API and
+ * only navigates once the store reports an authenticated session.
+ */
 const Login = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    rememberMe: false,
-  });
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setIsLoading(true);
-
-    try {
-      // Simulate login - replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      navigate('/dashboard');
-    } catch (err) {
-      setError('Invalid email or password');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch]);
 
   return (
     <AuthLayout>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full"
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Welcome back</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">Sign in to your account</p>
+          <p className="mt-1 text-gray-600 dark:text-gray-400">
+            Sign in with your email, password and authenticator code.
+          </p>
         </div>
 
-        {error && (
-          <Alert variant="error" className="mb-6">
-            {error}
-          </Alert>
+        {USE_MOCK_API && (
+          <Alert
+            variant="info"
+            className="mb-6"
+            icon={Info}
+            title="Preview mode — mock API"
+            description="Email demo@securebank.test · password SecureBank!2026 · the current 6-digit code is shown after you start enrolment in the Security Centre. Five wrong passwords lock sign-in for 15 minutes so you can see the lockout behave."
+          />
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <Input
-            type="email"
-            label="Email"
-            placeholder="you@example.com"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            leftIcon={Mail}
-            required
-          />
-
-          <Input
-            type={showPassword ? 'text' : 'password'}
-            label="Password"
-            placeholder="••••••••"
-            value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            leftIcon={Lock}
-            showPasswordToggle={showPassword}
-            onPasswordToggle={() => setShowPassword(!showPassword)}
-            required
-          />
-
-          <div className="flex items-center justify-between">
-            <Checkbox
-              checked={formData.rememberMe}
-              onChange={(e) => setFormData({ ...formData, rememberMe: e.target.checked })}
-              label="Remember me"
-            />
-            <Link to="/auth/forgot-password" className="text-sm text-primary-600 hover:text-primary-700">
-              Forgot password?
-            </Link>
-          </div>
-
-          <Button type="submit" fullWidth loading={isLoading}>
-            Sign In
-          </Button>
-        </form>
-
-        <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-          Don't have an account?{' '}
-          <Link to="/auth/register" className="text-primary-600 hover:text-primary-700 font-medium">
-            Sign up
-          </Link>
-        </p>
+        <LoginForm onSuccess={() => navigate('/dashboard', { replace: true })} />
       </motion.div>
     </AuthLayout>
   );

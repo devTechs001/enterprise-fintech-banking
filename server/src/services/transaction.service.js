@@ -1,24 +1,25 @@
-const { Op, Transaction: SequelizeTransaction } = require('sequelize');
-const { sequelize } = require('@/database/connection');
-const { Transaction, Account, User, Beneficiary } = require('@/database/models');
-const { 
+import { Op, Transaction as SequelizeTransaction } from 'sequelize';
+import { sequelize } from '#database/connection.js';
+import { Transaction, Account, User, Beneficiary } from '#database/models/index.js';
+import { 
   TRANSACTION_TYPES, 
   TRANSACTION_STATUS,
   ERROR_CODES 
-} = require('@/constants');
-const { 
+} from '#constants/index.js';
+import { 
   InsufficientFundsException,
   TransactionException,
   ValidationException,
   NotFoundException 
-} = require('@/exceptions');
-const { generateTransactionId, generateReference } = require('@/utils/generators');
-const { calculateFee } = require('@/utils/calculators');
-const { EventEmitter } = require('@/events');
-const { FraudService } = require('./fraud.service');
-const { NotificationService } = require('./notification.service');
-const { AuditService } = require('./audit.service');
-const { redis } = require('@/config/redis.config');
+} from '#exceptions/index.js';
+import { generateTransactionId, generateReference } from '#utils/generators/index.js';
+import { calculateFee } from '#utils/calculators/index.js';
+import { EventEmitter } from '#events.js';
+import { FraudService } from './fraud.service.js';
+import { NotificationService } from './notification.service.js';
+import { AuditService } from './audit.service.js';
+import { redis, deleteByPattern } from '#config/redis.config.js';
+import logger from '#logger.js';
 
 class TransactionService {
   /**
@@ -599,12 +600,13 @@ class TransactionService {
     ];
 
     for (const pattern of patterns) {
-      const keys = await redis.keys(pattern);
-      if (keys.length > 0) {
-        await redis.del(keys);
-      }
+      // SCAN, not KEYS: KEYS walks the entire keyspace in one blocking call.
+      const removed = await deleteByPattern(pattern);
+      if (removed) logger.debug('Cache invalidated', { pattern, removed });
     }
   }
 }
 
-module.exports = new TransactionService();
+export const transactionService = new TransactionService();
+export { TransactionService };
+export default transactionService;

@@ -1,2 +1,2 @@
 export { CardApplicationForm } from './CardApplicationForm';
-export { default as CardApplicationFormDefault } from './CardApplicationForm';
+export { default } from './CardApplicationForm';

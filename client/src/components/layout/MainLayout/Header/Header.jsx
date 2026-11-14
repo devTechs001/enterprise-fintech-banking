@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { cn } from '@/utils/helpers';
@@ -16,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/common/Button';
+import { useNotifications } from '@/context/NotificationContext';
 import { Avatar } from '@/components/common/Avatar';
 import { Badge } from '@/components/common/Badge';
 import {
@@ -31,6 +33,12 @@ import { useAuth } from '@/context/AuthContext';
 
 const Header = ({ sidebarOpen, sidebarCollapsed, onToggleSidebar }) => {
   const { theme, toggleTheme } = useTheme();
+
+  const navigate = useNavigate();
+  // Real notification feed. The dropdown previously showed two hardcoded sample
+  // items and a badge hardcoded to "3" regardless of actual unread count.
+  const { notifications = [], unreadCount = 0 } = useNotifications() || {};
+  const previewNotifications = (notifications || []).slice(0, 4);
   const { user, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -92,13 +100,16 @@ const Header = ({ sidebarOpen, sidebarCollapsed, onToggleSidebar }) => {
           )}
         </Button>
 
-        {/* Help */}
+        {/* Help — was inert; now routes to the Help Centre. */}
         <Button
           variant="ghost"
           size="icon"
           className="text-gray-500 hover:text-gray-700 dark:text-gray-400"
+          onClick={() => navigate('/help')}
+          aria-label="Help centre"
+          title="Help centre"
         >
-          <HelpCircle className="w-5 h-5" />
+          <HelpCircle className="w-5 h-5" aria-hidden="true" />
         </Button>
 
         {/* Notifications */}
@@ -110,13 +121,15 @@ const Header = ({ sidebarOpen, sidebarCollapsed, onToggleSidebar }) => {
               className="text-gray-500 hover:text-gray-700 dark:text-gray-400 relative"
             >
               <Bell className="w-5 h-5" />
-              <Badge
-                variant="danger"
-                size="sm"
-                className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-              >
-                3
-              </Badge>
+              {unreadCount > 0 && (
+                <Badge
+                  variant="danger"
+                  size="sm"
+                  className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                >
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </Badge>
+              )}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-80">
@@ -124,35 +137,43 @@ const Header = ({ sidebarOpen, sidebarCollapsed, onToggleSidebar }) => {
               <h3 className="font-semibold">Notifications</h3>
             </div>
             <div className="max-h-64 overflow-y-auto">
-              <DropdownMenuItem className="flex-col items-start gap-1 p-4">
-                <span className="font-medium">Payment Received</span>
-                <span className="text-sm text-gray-500">
-                  You received $500 from John Doe
-                </span>
-                <span className="text-xs text-gray-400">2 minutes ago</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="flex-col items-start gap-1 p-4">
-                <span className="font-medium">Low Balance Alert</span>
-                <span className="text-sm text-gray-500">
-                  Your checking account balance is below $100
-                </span>
-                <span className="text-xs text-gray-400">1 hour ago</span>
-              </DropdownMenuItem>
+              {previewNotifications.length === 0 ? (
+                <p className="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                  You are all caught up.
+                </p>
+              ) : (
+                previewNotifications.map((notification) => (
+                  <DropdownMenuItem
+                    key={notification.id}
+                    className="flex-col items-start gap-1 p-4"
+                    onSelect={() => navigate('/notifications')}
+                  >
+                    <span className="font-medium">{notification.title}</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">{notification.body || notification.message}</span>
+                    <span className="text-xs text-gray-400">
+                      {notification.createdAt ? new Date(notification.createdAt).toLocaleString() : ''}
+                    </span>
+                  </DropdownMenuItem>
+                ))
+              )}
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="justify-center text-primary-600">
+            <DropdownMenuItem className="justify-center text-primary-600" onSelect={() => navigate('/notifications')}>
               View all notifications
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Settings */}
+        {/* Settings — was inert; now routes to Settings. */}
         <Button
           variant="ghost"
           size="icon"
           className="text-gray-500 hover:text-gray-700 dark:text-gray-400"
+          onClick={() => navigate('/settings')}
+          aria-label="Settings"
+          title="Settings"
         >
-          <Settings className="w-5 h-5" />
+          <Settings className="w-5 h-5" aria-hidden="true" />
         </Button>
 
         {/* User Menu */}

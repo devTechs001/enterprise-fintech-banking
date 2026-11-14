@@ -5,6 +5,7 @@ import { Header } from './Header/Header';
 import { Sidebar } from './Sidebar/Sidebar';
 import { Footer } from './Footer/Footer';
 import { SidebarProvider } from '@/context/SidebarContext';
+import { DevModeBadge } from '@/components/common/DevModeBadge';
 
 const MainLayout = ({ children, className }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -55,6 +56,10 @@ const MainLayout = ({ children, className }) => {
 
           {/* Footer */}
           <Footer />
+
+          {/* Dev-only marker. In a production bundle DEV_MODE is the literal
+              `false`, so this renders nothing and is stripped by the minifier. */}
+          <DevModeBadge />
         </div>
       </div>
     </SidebarProvider>

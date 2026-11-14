@@ -1,11 +1,4 @@
-import { LoanCalculator } from './LoanCalculator/LoanCalculator';
-import { LoanStatus } from './LoanStatus/LoanStatus';
-import { EMISchedule } from './EMISchedule/EMISchedule';
-import { LoanComparison } from './LoanComparison/LoanComparison';
-
-export {
-  LoanCalculator,
-  LoanStatus,
-  EMISchedule,
-  LoanComparison,
-};
+export { LoanCalculator } from './LoanCalculator/LoanCalculator';
+export { LoanStatus } from './LoanStatus/LoanStatus';
+export { EMISchedule } from './EMISchedule/EMISchedule';
+export { LoanComparison } from './LoanComparison/LoanComparison';

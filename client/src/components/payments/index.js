@@ -1,11 +1,4 @@
-import { BillPayment } from './BillPayment/BillPayment';
-import { QRPayment } from './QRPayment/QRPayment';
-import { ScheduledPayments } from './ScheduledPayments/ScheduledPayments';
-import { PaymentHistory } from './PaymentHistory/PaymentHistory';
-
-export {
-  BillPayment,
-  QRPayment,
-  ScheduledPayments,
-  PaymentHistory,
-};
+export { BillPayment } from './BillPayment/BillPayment';
+export { QRPayment } from './QRPayment/QRPayment';
+export { ScheduledPayments } from './ScheduledPayments/ScheduledPayments';
+export { PaymentHistory } from './PaymentHistory/PaymentHistory';

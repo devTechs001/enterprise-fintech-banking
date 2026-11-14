@@ -42,14 +42,9 @@ export const useAccounts = (options = {}) => {
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchInterval,
     refetchOnWindowFocus: true,
-    retry: 3,
-    onError: (err) => {
-      toast({
-        title: 'Error',
-        description: err.message || 'Failed to fetch accounts',
-        variant: 'error',
-      });
-    },
+    // React Query v5 removed per-query `onError`; errors are surfaced by the
+    // caller (and by the mutation callbacks below).
+    retry: 1,
   });
 
   // Calculate totals
