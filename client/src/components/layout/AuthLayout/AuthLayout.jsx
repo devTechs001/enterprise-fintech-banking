@@ -7,6 +7,18 @@ const AuthLayout = ({ children, className }) => {
     <div className="min-h-screen flex">
       {/* Left Side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary-600 via-primary-700 to-purple-800 relative overflow-hidden">
+        {/* Background photograph behind the gradient. Decorative: aria-hidden, empty
+            alt, and the gradient stays on top at reduced opacity so the white text
+            keeps its contrast ratio rather than depending on the image's tones. */}
+        <img
+          src="/images/auth-bg.jpg"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full object-cover"
+          loading="eager"
+          decoding="async"
+        />
+        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-br from-primary-900/80 via-primary-800/70 to-purple-900/85" />
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />

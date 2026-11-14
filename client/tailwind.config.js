@@ -20,6 +20,12 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
+      keyframes: {
+        splash: {
+          '0%': { transform: 'translateX(-110%)' },
+          '100%': { transform: 'translateX(320%)' },
+        },
+      },
       colors: {
         primary: {
           50: '#eff6ff',

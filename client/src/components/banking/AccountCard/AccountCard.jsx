@@ -297,4 +297,5 @@ AccountCard.propTypes = {
   showActions: PropTypes.bool,
 };
 
+export { AccountCard };
 export default AccountCard;

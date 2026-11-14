@@ -6,13 +6,34 @@
  * @returns {string} Formatted currency string
  */
 export const formatCurrency = (amount, currency = 'USD', options = {}) => {
-  return new Intl.NumberFormat('en-US', {
+  const merged = {
     style: 'currency',
     currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
     ...options,
-  }).format(amount);
+  };
+
+  // `Intl.NumberFormat` THROWS a RangeError when minimumFractionDigits exceeds
+  // maximumFractionDigits. Spreading a caller's `{ maximumFractionDigits: 0 }` over
+  // the 2-digit minimum did exactly that, so every quick-amount chip in
+  // AmountInput crashed the component tree at render time — in the transfer and
+  // bill-payment flows, which is where it is least acceptable.
+  //
+  // Reconciling here fixes the whole family of call sites rather than each one
+  // remembering to pass both fields. A caller asking for 0 decimal places gets 0;
+  // the default stays 2.
+  if (merged.minimumFractionDigits > merged.maximumFractionDigits) {
+    merged.minimumFractionDigits = merged.maximumFractionDigits;
+  }
+
+  // An unsupported currency code throws too, and one bad row of data should not
+  // take the page down with it.
+  try {
+    return new Intl.NumberFormat('en-US', merged).format(amount);
+  } catch {
+    return new Intl.NumberFormat('en-US', { ...merged, style: 'decimal' }).format(amount);
+  }
 };
 
 /**

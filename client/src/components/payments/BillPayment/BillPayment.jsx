@@ -6,23 +6,39 @@ import { Button } from '@/components/common/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/common/Card';
 import { Alert } from '@/components/common/Alert';
 import { AmountInput } from '@/components/transfers/AmountInput';
+import { Input } from '@/components/common/Input';
 
 /**
  * Bill payment.
  *
  * Shares the transfer rails: the amount, limit and beneficiary checks are all
  * enforced by the API, not here.
+ *
+ * The reference field is not optional polish. Every biller requires an account or
+ * meter number, each with its own minimum length, and the API rejects a payment
+ * without one — so a form that never asked for it could not complete a single
+ * payment. It is validated here too, because a customer should learn the number is
+ * too short before they wait on a round trip, but the server's own check is the one
+ * that actually decides.
  */
 const BillPayment = ({ bills = [], available = 0, dailyLimit, onPay }) => {
   const [selected, setSelected] = useState(null);
   const [amount, setAmount] = useState(null);
+  const [reference, setReference] = useState('');
   const [state, setState] = useState(null);
 
+  const minLength = selected?.minLength ?? 0;
+  const referenceTrimmed = reference.trim();
+  const referenceError = selected && minLength > 0 && referenceTrimmed.length > 0 && referenceTrimmed.length < minLength
+    ? `${selected.referenceLabel || 'Reference'} must be at least ${minLength} characters.`
+    : undefined;
+  const referenceMissing = Boolean(selected && minLength > 0 && referenceTrimmed.length === 0);
+
   const submit = async () => {
-    if (!selected || !amount) return;
+    if (!selected || !amount || referenceMissing || referenceError) return;
     setState({ kind: 'pending' });
     try {
-      const result = await onPay?.({ bill: selected, amount });
+      const result = await onPay?.({ bill: selected, amount, reference: referenceTrimmed });
       setState({ kind: 'success', message: `Paid ${selected.name} ${amount.toLocaleString()}.`, result });
     } catch (error) {
       setState({ kind: 'error', message: error?.apiMessage || 'Payment declined.' });
@@ -65,11 +81,33 @@ const BillPayment = ({ bills = [], available = 0, dailyLimit, onPay }) => {
           ))}
         </div>
         {selected && (
-          <AmountInput value={amount ?? ''} onChange={setAmount} available={available} dailyLimit={dailyLimit} />
+          <>
+            <div>
+              <Input
+                label={selected.referenceLabel || 'Account / meter number'}
+                name="reference"
+                value={reference}
+                onChange={(event) => setReference(event.target.value)}
+                error={referenceError}
+                helperText={minLength > 0
+                  ? `As printed on your ${selected.name} bill. Minimum ${minLength} characters.`
+                  : `As printed on your ${selected.name} bill.`}
+                autoComplete="off"
+                // Never prefill or remember a meter number: it identifies a
+                // household and is not this browser's to keep.
+                spellCheck={false}
+              />
+            </div>
+            <AmountInput value={amount ?? ''} onChange={setAmount} available={available} dailyLimit={dailyLimit} />
+          </>
         )}
         {state?.kind === 'error' && <Alert variant="danger" title="Payment declined" description={state.message} />}
         {state?.kind === 'success' && <Alert variant="success" title="Payment sent" description={state.message} />}
-        <Button onClick={submit} disabled={!selected || !amount || state?.kind === 'pending'} loading={state?.kind === 'pending'}>
+        <Button
+          onClick={submit}
+          disabled={!selected || !amount || referenceMissing || Boolean(referenceError) || state?.kind === 'pending'}
+          loading={state?.kind === 'pending'}
+        >
           Pay bill
         </Button>
       </CardContent>
@@ -78,7 +116,14 @@ const BillPayment = ({ bills = [], available = 0, dailyLimit, onPay }) => {
 };
 
 BillPayment.propTypes = {
-  bills: PropTypes.arrayOf(PropTypes.shape({ id: PropTypes.string.isRequired, name: PropTypes.string.isRequired, accountNumber: PropTypes.string, dueAmount: PropTypes.number })),
+  bills: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    accountNumber: PropTypes.string,
+    dueAmount: PropTypes.number,
+    minLength: PropTypes.number,
+    referenceLabel: PropTypes.string,
+  })),
   available: PropTypes.number,
   dailyLimit: PropTypes.number,
   onPay: PropTypes.func,

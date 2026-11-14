@@ -41,3 +41,4 @@ export { Switch } from './Switch';
 export { SearchInput } from './SearchInput';
 export { OTPInput } from './OTPInput';
 export { CurrencyInput } from './CurrencyInput';
+export { SplashScreen } from './SplashScreen';

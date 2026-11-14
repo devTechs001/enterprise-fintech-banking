@@ -7,8 +7,6 @@ import {
   TrendingDown,
   Plus,
   Eye,
-  Bell,
-  Settings,
   CreditCard,
   Wallet,
   PiggyBank,
@@ -16,11 +14,14 @@ import {
   Send,
   QrCode,
   Receipt,
-  ArrowRightLeft
+  ArrowRightLeft,
+  Users
 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
+import axiosInstance from '@/api/axiosInstance';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { AccountCard } from '@/components/banking/AccountCard';
 import { TransactionList } from '@/components/banking/TransactionList';
@@ -106,7 +107,7 @@ const StatCard = ({ title, value, change, changeType, icon: Icon }) => (
           <h3 className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
             {value}
           </h3>
-          {change !== undefined && (
+          {typeof change === 'number' && (
             <div className="mt-2 flex items-center gap-1">
               {changeType === 'increase' ? (
                 <TrendingUp className="w-4 h-4 text-green-500" />
@@ -135,6 +136,17 @@ const StatCard = ({ title, value, change, changeType, icon: Icon }) => (
 );
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+
+  // Real figures for the summary cards. Failure is non-fatal: the dashboard still
+  // renders, it just shows em dashes where a number could not be sourced.
+  const { data: analyticsResponse } = useQuery({
+    queryKey: ['analytics-overview'],
+    queryFn: async () => (await axiosInstance.get('/analytics/overview')).data,
+    staleTime: 60_000,
+  });
+  const analyticsData = analyticsResponse?.analytics;
+  const latestMonth = analyticsData?.cashflow?.length ? analyticsData.cashflow[analyticsData.cashflow.length - 1] : null;
   const user = useSelector(selectUser);
   const [selectedPeriod, setSelectedPeriod] = useState('month');
   
@@ -183,16 +195,14 @@ const Dashboard = () => {
               Here's what's happening with your finances today.
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <Button variant="outline" leftIcon={Bell} size="icon">
-              <span className="sr-only">Notifications</span>
-            </Button>
-            <Button variant="outline" leftIcon={Settings} size="icon">
-              <span className="sr-only">Settings</span>
-            </Button>
-            <Button leftIcon={Plus}>
-              New Transaction
-            </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            {/* The bell and the cog were inert duplicates of the header's own
+                controls — two buttons that looked live and did nothing. Removed
+                rather than wired, because a second copy of a control that already
+                sits 200px above is a source of confusion, not convenience. */}
+            <Link to="/transfers"><Button variant="outline" leftIcon={Send}>Transfer</Button></Link>
+            <Link to="/payments"><Button variant="outline" leftIcon={Receipt}>Pay a bill</Button></Link>
+            <Link to="/transfers"><Button leftIcon={Plus}>New Transaction</Button></Link>
           </div>
         </motion.div>
 
@@ -204,29 +214,26 @@ const Dashboard = () => {
           <StatCard
             title="Total Balance"
             value={formatCurrency(totalBalance || 0)}
-            change={12.5}
-            changeType="increase"
+            change={analyticsData?.netWorthChange}
+            changeType={analyticsData?.netWorthChange >= 0 ? 'increase' : 'decrease'}
             icon={Wallet}
           />
+          {/* These three were hardcoded to $8,450 / $3,200 / $15,000 for every
+              user. They now come from the analytics feed; a figure we cannot source
+              renders as an em dash rather than as a plausible invention. */}
           <StatCard
             title="Monthly Income"
-            value={formatCurrency(8450.00)}
-            change={8.2}
-            changeType="increase"
+            value={latestMonth ? formatCurrency(latestMonth.income) : '—'}
             icon={ArrowDownLeft}
           />
           <StatCard
             title="Monthly Expenses"
-            value={formatCurrency(3200.00)}
-            change={5.4}
-            changeType="decrease"
+            value={latestMonth ? formatCurrency(latestMonth.expenses) : '—'}
             icon={ArrowUpRight}
           />
           <StatCard
-            title="Savings"
-            value={formatCurrency(15000.00)}
-            change={15.8}
-            changeType="increase"
+            title="Savings Rate"
+            value={analyticsData ? `${analyticsData.savingsRate}%` : '—'}
             icon={PiggyBank}
           />
         </motion.div>
@@ -239,30 +246,39 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
+                {/* All six of these previously rendered with no onClick — they
+                    looked tappable and did nothing. Each now goes where its label
+                    says, carrying context where the destination can use it. */}
                 <QuickActionButton
                   icon={Send}
                   label="Send Money"
                   variant="primary"
-                />
-                <QuickActionButton
-                  icon={ArrowDownLeft}
-                  label="Request"
-                />
-                <QuickActionButton
-                  icon={ArrowRightLeft}
-                  label="Transfer"
+                  onClick={() => navigate('/transfers')}
                 />
                 <QuickActionButton
                   icon={Receipt}
                   label="Pay Bills"
+                  onClick={() => navigate('/payments')}
                 />
                 <QuickActionButton
                   icon={QrCode}
                   label="QR Pay"
+                  onClick={() => navigate('/payments?tab=qr')}
+                />
+                <QuickActionButton
+                  icon={ArrowRightLeft}
+                  label="Between accounts"
+                  onClick={() => navigate('/transfers?mode=own')}
+                />
+                <QuickActionButton
+                  icon={Users}
+                  label="Beneficiaries"
+                  onClick={() => navigate('/beneficiaries')}
                 />
                 <QuickActionButton
                   icon={CreditCard}
                   label="Cards"
+                  onClick={() => navigate('/cards')}
                 />
               </div>
             </CardContent>
@@ -297,9 +313,9 @@ const Dashboard = () => {
                     <AccountCard
                       key={account.id}
                       account={account}
-                      onTransfer={() => {}}
-                      onDeposit={() => {}}
-                      onViewDetails={() => {}}
+                      onTransfer={() => navigate(`/transfers?from=${encodeURIComponent(account.id)}`)}
+                      onDeposit={() => navigate(`/accounts?deposit=${encodeURIComponent(account.id)}`)}
+                      onViewDetails={() => navigate(`/accounts?account=${encodeURIComponent(account.id)}`)}
                     />
                   ))}
                 </div>
@@ -311,7 +327,7 @@ const Dashboard = () => {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle>Recent Transactions</CardTitle>
-                  <Link to="/transactions">
+                  <Link to="/accounts">
                     <Button variant="ghost" size="sm" rightIcon={Eye}>
                       View All
                     </Button>
@@ -393,9 +409,9 @@ const Dashboard = () => {
                     <p className="text-gray-500 dark:text-gray-400">
                       No cards yet
                     </p>
-                    <Button variant="link" className="mt-2">
-                      Apply for a card
-                    </Button>
+                    <Link to="/cards?apply=1">
+                      <Button variant="link" className="mt-2">Apply for a card</Button>
+                    </Link>
                   </div>
                 </Card>
               )}

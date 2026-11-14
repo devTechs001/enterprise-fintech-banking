@@ -35,28 +35,27 @@ import { useAuth } from '@/context/AuthContext';
  * Only routes that actually exist are linked. The previous list pointed at
  * /accounts, /payments, /cards, /investments, /loans, /analytics, /beneficiaries,
  * /settings and /help — none of which were mounted, so every one of them landed
- * on the 404 page. Unbuilt areas are marked `soon` and rendered inert.
+ * on the 404 page. Every entry now resolves to a real route; the `soon` state is
+ * retained in `SidebarItem` for future work rather than deleted, so an unbuilt
+ * area can be listed inert instead of dead-linking to a 404.
  */
 const mainNavItems = [
   { icon: LayoutDashboard, label: 'Dashboard', to: '/dashboard' },
+  { icon: Wallet, label: 'Accounts', to: '/accounts' },
   { icon: ArrowRightLeft, label: 'Transfers', to: '/transfers' },
+  { icon: Users, label: 'Beneficiaries', to: '/beneficiaries' },
+  { icon: Receipt, label: 'Payments', to: '/payments' },
+  { icon: CreditCard, label: 'Cards', to: '/cards' },
+  { icon: TrendingUp, label: 'Investments', to: '/investments' },
+  { icon: FileText, label: 'Loans', to: '/loans' },
+  { icon: PieChart, label: 'Analytics', to: '/analytics' },
   { icon: Shield, label: 'Security', to: '/security' },
-];
-
-const secondaryNavItems = [
   { icon: Bell, label: 'Notifications', to: '/notifications' },
-  { icon: Wallet, label: 'Accounts', soon: true },
-  { icon: Receipt, label: 'Payments', soon: true },
-  { icon: CreditCard, label: 'Cards', soon: true },
-  { icon: TrendingUp, label: 'Investments', soon: true },
-  { icon: FileText, label: 'Loans', soon: true },
-  { icon: PieChart, label: 'Analytics', soon: true },
-  { icon: Users, label: 'Beneficiaries', soon: true },
 ];
 
 const bottomNavItems = [
-  { icon: Settings, label: 'Settings', soon: true },
-  { icon: HelpCircle, label: 'Help Center', soon: true },
+  { icon: Settings, label: 'Settings', to: '/settings' },
+  { icon: HelpCircle, label: 'Help Center', to: '/help' },
 ];
 
 const Sidebar = ({ isOpen, isCollapsed, onToggle, onCollapse }) => {
@@ -117,32 +116,18 @@ const Sidebar = ({ isOpen, isCollapsed, onToggle, onCollapse }) => {
               />
             ))}
           </SidebarGroup>
-
-          {/* Secondary Navigation */}
-          <SidebarGroup title={!isCollapsed ? 'More' : null}>
-            {secondaryNavItems.map((item) => (
-              <SidebarItem
-                key={item.label}
-                icon={item.icon}
-                label={item.label}
-                to={item.soon ? undefined : item.to}
-                disabled={item.soon}
-                isActive={item.to ? isActive(item.to) : false}
-                collapsed={isCollapsed}
-              />
-            ))}
-          </SidebarGroup>
         </nav>
 
         {/* Bottom Navigation */}
         <div className="border-t border-gray-200 dark:border-gray-800 py-4">
           {bottomNavItems.map((item) => (
             <SidebarItem
-              key={item.label}
+              key={item.to}
               icon={item.icon}
               label={item.label}
+              to={item.to}
               disabled={item.soon}
-              isActive={false}
+              isActive={isActive(item.to)}
               collapsed={isCollapsed}
             />
           ))}

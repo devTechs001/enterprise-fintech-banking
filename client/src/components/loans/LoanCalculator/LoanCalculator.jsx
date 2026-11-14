@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
-import { Calculator } from 'lucide-react';
+import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
+import { Calculator, ArrowRight } from 'lucide-react';
 
 import { Button } from '@/components/common/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/common/Card';
@@ -10,7 +12,13 @@ import { formatCurrency } from '@/utils/formatters';
  * EMI calculator. Uses the same closed-form amortisation the server uses
  * (`shared/utils/calculators`), with a guard for the 0% case.
  */
-const LoanCalculator = () => {
+/**
+ * `onApply` receives the figures the user just dialled in. Without a handler the
+ * button previously rendered inert; the default carries them to the Loans page's
+ * apply tab in the query string, so nothing the user typed is thrown away.
+ */
+const LoanCalculator = ({ onApply }) => {
+  const navigate = useNavigate();
   const [principal, setPrincipal] = useState(25000);
   const [annualRate, setAnnualRate] = useState(11.5);
   const [months, setMonths] = useState(36);
@@ -51,7 +59,22 @@ const LoanCalculator = () => {
         ) : (
           <p className="text-sm text-gray-500">Enter a positive amount and term.</p>
         )}
-        <Button variant="outline">Apply for this loan</Button>
+        <Button
+          variant="outline"
+          rightIcon={ArrowRight}
+          disabled={!result}
+          onClick={() => (onApply
+            ? onApply({ principal: Number(principal), annualRate: Number(annualRate), months: Number(months) })
+            : navigate(`/loans?tab=apply&amount=${encodeURIComponent(principal)}&months=${encodeURIComponent(months)}`))}
+        >
+          Apply for this loan
+        </Button>
+        {result && (
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Figures carried into the application. Indicative only — your rate is set
+            at underwriting and confirmed in an offer, never by this calculator.
+          </p>
+        )}
       </CardContent>
     </Card>
   );
@@ -59,3 +82,5 @@ const LoanCalculator = () => {
 
 export { LoanCalculator };
 export default LoanCalculator;
+
+LoanCalculator.propTypes = { onApply: PropTypes.func };

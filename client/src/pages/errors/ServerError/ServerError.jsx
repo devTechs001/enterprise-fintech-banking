@@ -1,19 +1,26 @@
-import { Link } from 'react-router-dom';
+import { ErrorLayout } from '@/components/layout/ErrorLayout/ErrorLayout';
+
 import { Button } from '@/components/common/Button';
 
-const ServerError = () => {
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
-      <h1 className="text-6xl font-bold text-gray-900 dark:text-white">500</h1>
-      <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
-        Something went wrong on our end. Please try again later.
-      </p>
-      <Link to="/" className="mt-8">
-        <Button>Go Home</Button>
-      </Link>
+/**
+ * 500.
+ *
+ * Deliberately says nothing about what failed. The server never returns a stack
+ * trace or an internal message, and this page does not invent one — leaking detail
+ * here would undo the error-handler work. "Try again" reloads rather than
+ * navigating home, because for a transient failure reloading is what actually helps.
+ */
+const ServerError = () => (
+  <ErrorLayout
+    errorCode="500"
+    title="Something went wrong"
+    description="We could not complete that request. No detail is shown on purpose — error internals are never exposed to the browser."
+  >
+    <div className="flex justify-center">
+      <Button variant="outline" onClick={() => window.location.reload()}>Try again</Button>
     </div>
-  );
-};
+  </ErrorLayout>
+);
 
 export { ServerError };
 export default ServerError;

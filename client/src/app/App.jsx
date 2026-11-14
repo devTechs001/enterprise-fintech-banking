@@ -2,6 +2,7 @@ import { BrowserRouter } from 'react-router-dom';
 
 import AppProviders from './AppProviders';
 import AppRoutes from '../routes';
+import SessionGate from './SessionGate';
 
 /**
  * Main App component.
@@ -15,7 +16,11 @@ function App() {
   return (
     <BrowserRouter>
       <AppProviders>
-        <AppRoutes />
+        {/* Inside the providers: it reads `isInitialized` from AuthContext, and
+            it retires the inline splash painted by index.html before React runs. */}
+        <SessionGate>
+          <AppRoutes />
+        </SessionGate>
       </AppProviders>
     </BrowserRouter>
   );

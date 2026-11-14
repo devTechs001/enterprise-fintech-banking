@@ -240,6 +240,8 @@ const clientIp = (req) =>
  * Each handler receives (ctx) and returns [status, body].
  * `ctx` = { params, query, body, req, res, auth }
  */
+import { createExtraRoutes } from './extraRoutes.js';
+
 const routes = [
   /* ------------------------------ auth ------------------------------ */
   ['POST', /^\/auth\/login$/, async (ctx) => {
@@ -802,6 +804,9 @@ const routes = [
     if (!ctx.auth) return [401, { success: false, message: 'Access token required.' }];
     return [200, { success: true, data: { goals: savingsGoals } }];
   }],
+
+  /* ------------------- pages added after the review ------------------- */
+  ...createExtraRoutes({ state, logAudit }),
 ];
 
 const daysAgoIso = (d) => new Date(Date.now() - d * 86400000).toISOString();
