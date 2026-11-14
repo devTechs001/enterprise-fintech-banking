@@ -338,6 +338,22 @@ export const createExtraRoutes = ({ state, logAudit }) => {
     // Public on purpose: help content must be reachable when you are locked out.
     ['GET', /^\/help\/topics$/, async () => [200, { success: true, data: { topics: helpTopics, faqs } }]],
 
+    /**
+     * Public on purpose, like the rest of /help: a customer who cannot sign in is
+     * precisely the one who needs to reach support. Validates length rather than
+     * trusting the client, and returns a ticket id the UI can quote back — a form
+     * that only says "message sent" gives the customer nothing to reference.
+     */
+    ['POST', /^\/help\/contact$/, async (ctx) => {
+      const { name, email, topic, message } = ctx.body || {};
+      if (!name || String(name).trim().length < 2) return [422, { success: false, message: 'Tell us your name.' }];
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(email || ''))) return [422, { success: false, message: 'Enter a valid email address.' }];
+      if (!message || String(message).trim().length < 10) return [422, { success: false, message: 'Give us at least a sentence to work with.' }];
+      const ticket = `HLP-${Date.now().toString(36).toUpperCase()}${Math.floor(Math.random() * 90 + 10)}`;
+      logAudit('SUPPORT_MESSAGE_RECEIVED', 'success', { ticket, topic: topic || 'general' });
+      return [201, { success: true, data: { ticket, receivedAt: new Date().toISOString(), topic: topic || 'general' } }];
+    }],
+
     ['POST', /^\/help\/search$/, async (ctx) => {
       const term = String((ctx.body || {}).query || '').trim().toLowerCase();
       if (!term) return [200, { success: true, data: { results: [] } }];

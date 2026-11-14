@@ -1,6 +1,13 @@
 import { Routes, Route } from 'react-router-dom';
 
-import Landing from '@/pages/public/Landing/Landing';
+import Home from '@/pages/public/Home/Home';
+import Features from '@/pages/public/Features/Features';
+import Trust from '@/pages/public/Trust/Trust';
+import Pricing from '@/pages/public/Pricing/Pricing';
+import About from '@/pages/public/About/About';
+import Contact from '@/pages/public/Contact/Contact';
+import { PublicLayout } from '@/components/layout/PublicLayout';
+import { isDevMode } from '@/config/env';
 import Login from '@/pages/auth/Login/Login';
 import Register from '@/pages/auth/Register/Register';
 import ForgotPassword from '@/pages/auth/ForgotPassword/ForgotPassword';
@@ -21,6 +28,7 @@ import HelpCenter from '@/pages/help/HelpCenter/HelpCenter';
 import NotFound from '@/pages/errors/NotFound/NotFound';
 import ServerError from '@/pages/errors/ServerError/ServerError';
 
+import { lazy, Suspense } from 'react';
 import AuthGuard from './guards/AuthGuard';
 import GuestGuard from './guards/GuestGuard';
 
@@ -39,10 +47,45 @@ import GuestGuard from './guards/GuestGuard';
  * you need when you are locked out, and putting it behind auth makes it useless
  * in the one situation it was written for.
  */
+// Loaded only on a dev server (see the conditional route below). `React.lazy` keeps
+// the console in its own chunk so a production build neither registers the path nor
+// fetches the code; the surrounding `isDevMode()` check is what actually decides.
+// Vite replaces `import.meta.env.DEV` / `.PROD` with literal booleans at build time,
+// so in a production bundle this whole ternary is `false ? <import> : null` — dead
+// code that Rollup removes, taking the dynamic import (and therefore the chunk) with
+// it. Going through the `isDevMode()` helper instead would NOT work: Rollup cannot
+// constant-fold across the function call, and the chunk would ship after all.
+// Production does not ship the dev console, does not register its route, and cannot
+// fetch it.
+const DevConsole = import.meta.env.DEV && !import.meta.env.PROD
+  ? lazy(() => import('@/pages/dev/DevConsole/DevConsole'))
+  : null;
+
 const AppRoutes = () => (
   <Routes>
-    <Route path="/" element={<Landing />} />
-    <Route path="/help" element={<HelpCenter />} />
+    {/* The public area is a multi-route SPA: each page has its own URL and is
+        linkable, refreshable and back-button-correct. It replaced a single long
+        scroll whose nav relied on anchors (#pricing, #about, #contact) pointing at
+        sections that did not exist. */}
+    <Route path="/" element={<Home />} />
+    <Route path="/features" element={<Features />} />
+    <Route path="/trust" element={<Trust />} />
+    <Route path="/pricing" element={<Pricing />} />
+    <Route path="/about" element={<About />} />
+    <Route path="/contact" element={<Contact />} />
+    <Route path="/help" element={<PublicLayout><HelpCenter /></PublicLayout>} />
+
+    {/* Development only. Absent from the route table entirely in production. */}
+    {isDevMode() && (
+      <Route
+        path="/dev"
+        element={
+          <PublicLayout>
+            <Suspense fallback={null}><DevConsole /></Suspense>
+          </PublicLayout>
+        }
+      />
+    )}
 
     <Route path="/login" element={<GuestGuard><Login /></GuestGuard>} />
     <Route path="/register" element={<GuestGuard><Register /></GuestGuard>} />

@@ -322,25 +322,124 @@ describe('LoanApplicationForm posted no productId, so the API answered 422', () 
   });
 });
 
-describe('landing page navigation', () => {
-  it('has a section behind every anchor the nav advertises', async () => {
-    const { default: Landing } = await import('@/pages/public/Landing/Landing');
-    render(<MemoryRouter><Landing /></MemoryRouter>);
+describe('public site is a multi-route SPA, not one long scroll', () => {
+  const PUBLIC_PAGES = [
+    ['/', /banking for the/i],
+    ['/features', /everything in one place/i],
+    ['/trust', /security you can inspect/i],
+    ['/pricing', /pricing with no surprises/i],
+    ['/about', /about securebank/i],
+    ['/contact', /contact us/i],
+    ['/help', /help centre/i],
+  ];
 
-    // The old page linked to #pricing / #about / #contact, none of which existed.
-    for (const id of ['features', 'security', 'get-started']) {
-      expect(document.getElementById(id), `#${id} should exist`).not.toBeNull();
-    }
-    for (const dead of ['pricing', 'about', 'contact']) {
-      expect(document.getElementById(dead), `#${dead} was removed with its dead link`).toBeNull();
+  it.each(PUBLIC_PAGES)('%s renders its own page', async (route, heading) => {
+    renderRoute(route);
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
+    });
+  });
+
+  it('the nav links to real routes and highlights the active page', async () => {
+    renderRoute('/pricing');
+    // NavLink, not a hand-rolled anchor: the current page is marked active. Scope to
+    // the primary nav landmark — the footer repeats the label, so an unscoped query
+    // is ambiguous by design.
+    const nav = await screen.findByRole('navigation', { name: /^primary$/i });
+    const link = within(nav).getByRole('link', { name: /^pricing$/i });
+    expect(link).toHaveAttribute('href', '/pricing');
+    expect(link.className).toMatch(/primary-/);
+  });
+
+  it('has no dead anchor links or href="#" anywhere in the public shell', async () => {
+    const { PublicLayout } = await import('@/components/layout/PublicLayout');
+    const { container } = render(
+      <MemoryRouter><PublicLayout><div>page</div></PublicLayout></MemoryRouter>
+    );
+    const anchors = [...container.querySelectorAll('a')];
+    expect(anchors.length).toBeGreaterThan(0);
+    for (const a of anchors) {
+      const href = a.getAttribute('href') || '';
+      // The only in-page anchor allowed is the skip-link to #main.
+      expect(href === '#main' || href.startsWith('/'), `unexpected href "${href}"`).toBe(true);
     }
   });
 
-  it('has no footer link pointing at "#"', async () => {
-    const { default: Landing } = await import('@/pages/public/Landing/Landing');
-    const { container } = render(<MemoryRouter><Landing /></MemoryRouter>);
-    const deadLinks = within(container).queryAllByRole('link').filter((a) => a.getAttribute('href') === '#');
-    expect(deadLinks).toHaveLength(0);
+  it('the contact form validates and submits to the public endpoint', async () => {
+    const user = userEvent.setup();
+    renderRoute('/contact');
+
+    await user.click(screen.getByRole('button', { name: /send message/i }));
+    await waitFor(() => expect(screen.getByText(/tell us your name/i)).toBeInTheDocument());
+
+    await user.type(screen.getByLabelText(/your name/i), 'Amina Wanjiru');
+    await user.type(screen.getByLabelText(/email address/i), 'amina@example.test');
+    await user.type(screen.getByLabelText(/message/i), 'A payment I did not make appeared yesterday.');
+    // Topic is a combobox Select, so drive it open.
+    await user.click(screen.getByRole('combobox', { name: /^topic$/i }));
+    await user.click(await screen.findByRole('option', { name: /payment looks wrong/i }));
+    await user.click(screen.getByRole('button', { name: /send message/i }));
+
+    await waitFor(() => expect(screen.getByText(/received — ticket/i)).toBeInTheDocument());
+  });
+
+  it('the pricing toggle recomputes figures rather than showing static columns', async () => {
+    const user = userEvent.setup();
+    renderRoute('/pricing');
+    const monthly = await screen.findByRole('button', { name: /monthly/i });
+    await user.click(monthly);
+    expect(screen.getAllByText(/billed monthly/i).length).toBeGreaterThan(0);
+    await user.click(screen.getByRole('button', { name: /annual/i }));
+    expect(screen.getAllByText(/billed yearly/i).length).toBeGreaterThan(0);
+  });
+});
+
+describe('development mode is excluded from production', () => {
+  it('the dev badge renders in dev and is absent when disabled', async () => {
+    const { DevModeBadge } = await import('@/components/common/DevModeBadge');
+    const { unmount } = render(
+      <MemoryRouter><DevModeBadge enabled /></MemoryRouter>
+    );
+    expect(screen.getByRole('button', { name: /development mode/i })).toBeInTheDocument();
+    unmount();
+
+    render(<MemoryRouter><DevModeBadge enabled={false} /></MemoryRouter>);
+    expect(screen.queryByRole('button', { name: /development mode/i })).not.toBeInTheDocument();
+  });
+
+  it('the /dev route is registered only when dev mode is on', async () => {
+    const { isDevMode } = await import('@/config/env');
+    const { readFileSync } = await import('node:fs');
+    const { join } = await import('node:path');
+    const routes = readFileSync(join(process.cwd(), 'src/routes/index.jsx'), 'utf8');
+
+    // The route is added conditionally, and the component is lazy behind a
+    // build-time literal so production neither registers nor ships it.
+    expect(routes).toContain('isDevMode() &&');
+    expect(routes).toContain("import.meta.env.DEV && !import.meta.env.PROD");
+    // And the dev console really is gated, not just imported eagerly.
+    expect(routes).not.toMatch(/^import DevConsole/m);
+
+    // Under vitest we ARE in dev mode, so /dev must resolve here.
+    expect(isDevMode()).toBe(true);
+    renderRoute('/dev');
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { level: 1, name: /dev console/i })).toBeInTheDocument();
+    });
+    expect(screen.getByText(/development build/i)).toBeInTheDocument();
+  });
+
+  it('a production build ships neither the dev console nor the dev badge strings', async () => {
+    const { readFileSync, readdirSync } = await import('node:fs');
+    const { join } = await import('node:path');
+    const dir = join(process.cwd(), 'dist/assets');
+    const chunks = readdirSync(dir).filter((f) => f.endsWith('.js'));
+    expect(chunks.length).toBeGreaterThan(0);
+    for (const chunk of chunks) {
+      const text = readFileSync(join(dir, chunk), 'utf8');
+      expect(text, `${chunk} must not contain the dev console`).not.toContain('Dev console');
+      expect(text, `${chunk} must not contain the dev badge`).not.toContain('DEV MODE');
+    }
   });
 });
 

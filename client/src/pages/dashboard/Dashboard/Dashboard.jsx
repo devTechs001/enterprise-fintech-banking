@@ -31,6 +31,8 @@ import { Button } from '@/components/common/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/common/Card';
 import { Skeleton } from '@/components/common/Skeleton';
 import { Badge } from '@/components/common/Badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/common/Tabs';
+import { Overview } from '@/pages/dashboard/Overview/Overview';
 
 import { useAccounts } from '@/hooks/banking/useAccounts';
 import { useTransactions } from '@/hooks/banking/useTransactions';
@@ -206,6 +208,17 @@ const Dashboard = () => {
           </div>
         </motion.div>
 
+        {/* Two views of the same data. "Activity" is the working dashboard;
+            "At a glance" is the Overview panel — security posture, totals and the
+            savings goal — which previously existed as a component nothing rendered.
+            A panel no route mounts is dead code that still costs its tests passing. */}
+        <Tabs defaultValue="activity">
+          <TabsList>
+            <TabsTrigger value="activity">Activity</TabsTrigger>
+            <TabsTrigger value="overview">At a glance</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="activity">
         {/* Stats Grid */}
         <motion.div 
           variants={itemVariants}
@@ -554,6 +567,12 @@ const Dashboard = () => {
             </motion.div>
           </div>
         </div>
+          </TabsContent>
+
+          <TabsContent value="overview">
+            <Overview />
+          </TabsContent>
+        </Tabs>
       </motion.div>
     </DashboardLayout>
   );
