@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { X } from 'lucide-react';
 import { cn } from '@/utils/helpers';
@@ -21,6 +21,18 @@ const Modal = forwardRef(
     },
     ref
   ) => {
+    // Hooks run on every render, so the "closed" early return sits below this effect.
+    // Escape closes the dialog: clicking the backdrop is a mouse convenience, and a
+    // modal that traps focus without an Escape route fails WCAG 2.1.2 (No Keyboard Trap).
+    useEffect(() => {
+      if (!isOpen) return undefined;
+      const onKeyDown = (event) => {
+        if (event.key === 'Escape') onClose();
+      };
+      document.addEventListener('keydown', onKeyDown);
+      return () => document.removeEventListener('keydown', onKeyDown);
+    }, [isOpen, onClose]);
+
     if (!isOpen) return null;
 
     const sizeClasses = {
@@ -31,22 +43,27 @@ const Modal = forwardRef(
       full: 'max-w-[95vw]',
     };
 
-    const handleOverlayClick = (e) => {
-      if (closeOnOverlay && e.target === e.currentTarget) {
-        onClose();
-      }
-    };
-
     return (
-      <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in"
-        onClick={handleOverlayClick}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modal-title"
-      >
+      <div className="fixed inset-0 z-50 flex items-center justify-center animate-fade-in">
+        {/* The backdrop is a real, labelled button rather than a div with a click
+            handler, so "dismiss by clicking outside" stays in the keyboard path.
+            role="dialog" belongs on the panel that holds the content — it used to sit
+            on the backdrop, which announced the whole viewport as the dialog. */}
+        {closeOnOverlay ? (
+          <button
+            type="button"
+            aria-label="Close dialog"
+            onClick={onClose}
+            className="absolute inset-0 h-full w-full cursor-default bg-black/50 backdrop-blur-sm"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" aria-hidden="true" />
+        )}
         <div
           ref={ref}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
           className={cn(
             'relative w-full mx-4 bg-white rounded-2xl shadow-2xl animate-scale-in dark:bg-gray-900',
             sizeClasses[size],

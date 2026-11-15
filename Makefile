@@ -1,68 +1,59 @@
-# Makefile for Enterprise Fintech Banking
+# Convenience targets. Run `make help` to list them.
+#
+# This is an npm workspaces repository (client, server, shared), so dependencies are
+# installed once at the root. Earlier revisions of this file claimed a root
+# `npm install` was impossible and installed per workspace instead; that was working
+# around a lockfile whose tarball URLs pointed at an unreachable mirror, not a
+# property of the repository. See README.md → "Installing dependencies".
 
-.PHONY: help dev build test lint format docker-up docker-down clean install
+.PHONY: help install dev-client dev-mock dev-server build build-client test test-client \
+        test-server check lint lint-client lint-server docker-up docker-down clean
 
 help: ## Show this help message
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-16s\033[0m %s\n", $$1, $$2}'
 
-install: ## Install all dependencies
-	npm install
+install: ## Install all three workspaces (npm workspaces, one tree at the root)
+	npm install --no-audit --no-fund
 
-dev: ## Start development servers
-	npm run dev
+dev-client: ## Client dev server against the real API (needs the server running)
+	cd client && npm run dev
 
-dev:client: ## Start client development server
-	npm run dev:client
+dev-mock: ## Client dev server against the in-memory mock API (no database needed)
+	cd client && npm run dev:mock
 
-dev:server: ## Start server development server
-	npm run dev:server
+dev-server: ## Server dev server (needs PostgreSQL; Redis optional)
+	cd server && npm run dev
 
-build: ## Build all projects
-	npm run build
+build: build-client ## Production-build the client (the server runs from source)
 
-build:client: ## Build client
-	npm run build:client
+build-client: ## Production-build the client into client/dist
+	cd client && npm run build
 
-build:server: ## Build server
-	npm run build:server
+test: test-client test-server ## Client suite (44 tests) + server self-checks (57)
 
-test: ## Run all tests
-	npm run test
+test-client: ## Client vitest suite
+	cd client && npm test
 
-test:client: ## Run client tests
-	npm run test:client
+test-server: ## Server verification: 57 self-checks (the repo has no server test files)
+	cd server && npm test
 
-test:server: ## Run server tests
-	npm run test:server
+check: ## 57 server self-checks, no database required
+	cd server && npm run check
 
-lint: ## Lint all projects
-	npm run lint
+lint: lint-client lint-server ## ESLint both workspaces (currently 0 errors)
 
-format: ## Format all code
-	npm run format
+lint-client: ## ESLint the client
+	cd client && npm run lint
 
-docker-up: ## Start Docker containers
-	docker-compose up -d
+lint-server: ## ESLint the server
+	cd server && npm run lint
 
-docker-down: ## Stop Docker containers
+docker-up: ## Start PostgreSQL + Redis only (app images are open work, DEV-12)
+	docker-compose up -d postgres redis
+
+docker-down: ## Stop backing services
 	docker-compose down
 
-docker-build: ## Build Docker images
-	docker-compose build
-
-docker-logs: ## Show Docker logs
-	docker-compose logs -f
-
-clean: ## Clean build artifacts and node_modules
-	rm -rf node_modules client/node_modules server/node_modules
-	rm -rf client/dist server/dist
-	docker-compose down -v
-
-db-migrate: ## Run database migrations
-	cd server && npm run db:migrate
-
-db-seed: ## Seed database
-	cd server && npm run db:seed
-
-generate-keys: ## Generate security keys
-	./scripts/generate-keys.sh
+clean: ## Remove every node_modules, dist and coverage directory
+	rm -rf node_modules client/node_modules server/node_modules shared/node_modules \
+	       client/dist client/coverage server/coverage

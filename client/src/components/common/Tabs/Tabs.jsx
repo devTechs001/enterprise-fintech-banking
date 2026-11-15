@@ -1,4 +1,4 @@
-import { createContext, useContext, useId, useMemo, useState } from 'react';
+import { createContext, useContext, useId, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { cn } from '@/utils/helpers';
 
@@ -29,11 +29,16 @@ const Tabs = ({ defaultValue, value, onValueChange, className, children, ...prop
 
 const TabsList = ({ className, children, ...props }) => {
   const { active, setActive, idBase } = useTabs();
-  const values = [];
+  // Tab values are read from the DOM in the ref callback below. They live in a ref
+  // rather than an array created during render: mutating a render-scoped variable
+  // from a ref callback is what react-hooks/immutability rejects, and the array would
+  // be a different (empty) object on every render anyway.
+  const valuesRef = useRef([]);
   const onKeyDown = (event) => {
     const keys = ['ArrowRight', 'ArrowLeft', 'Home', 'End'];
     if (!keys.includes(event.key)) return;
     event.preventDefault();
+    const values = valuesRef.current;
     const index = values.indexOf(active);
     let next = index;
     if (event.key === 'ArrowRight') next = (index + 1) % values.length;
@@ -49,16 +54,21 @@ const TabsList = ({ className, children, ...props }) => {
     <div
       role="tablist"
       aria-orientation="horizontal"
+      // The arrow-key handler sits on the list and receives keys bubbled from the
+      // focused trigger; tabIndex -1 makes the list focusable for that role without
+      // adding a second tab stop ahead of the triggers.
+      tabIndex={-1}
       onKeyDown={onKeyDown}
       className={cn(
         'inline-flex items-center gap-1 rounded-xl bg-gray-100 p-1 dark:bg-gray-800',
         className
       )}
       ref={(node) => {
-        if (node) {
-          values.length = 0;
-          node.querySelectorAll('[role="tab"]').forEach((t) => values.push(t.dataset.value));
-        }
+        if (!node) return;
+        valuesRef.current = Array.from(
+          node.querySelectorAll('[role="tab"]'),
+          (trigger) => trigger.dataset.value
+        );
       }}
       {...props}
     >

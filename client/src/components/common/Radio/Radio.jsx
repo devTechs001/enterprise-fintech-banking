@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useId } from 'react';
 import PropTypes from 'prop-types';
 import { cn } from '@/utils/helpers';
 
@@ -15,6 +15,10 @@ const Radio = forwardRef(
     },
     ref
   ) => {
+    // See Checkbox: the label is wired to the toggle with htmlFor so it is reachable
+    // by keyboard instead of responding to mouse clicks only.
+    const generatedId = useId();
+    const controlId = props.id ?? generatedId;
     return (
       <div className="flex items-start gap-3">
         <button
@@ -35,6 +39,7 @@ const Radio = forwardRef(
             className
           )}
           {...props}
+          id={controlId}
         >
           {checked && (
             <span className="absolute inset-1 rounded-full bg-primary-600" />
@@ -46,7 +51,7 @@ const Radio = forwardRef(
               'text-sm text-gray-700 dark:text-gray-300',
               disabled && 'cursor-not-allowed opacity-50'
             )}
-            onClick={() => !disabled && onChange?.(true)}
+            htmlFor={controlId}
           >
             {label}
           </label>

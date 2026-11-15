@@ -76,8 +76,8 @@ const Contact = () => {
 
         <Alert variant="warning" icon={ShieldAlert} className="mt-8 max-w-2xl">
           SecureBank will never ask for your password, one-time code or recovery codes by
-          phone, SMS or email. If someone has asked you for one, choose "I think I have
-          been defrauded" below and we will treat it as urgent.
+          phone, SMS or email. If someone has asked you for one, choose &quot;I think I
+          have been defrauded&quot; below and we will treat it as urgent.
         </Alert>
 
         <div className="mt-10 grid gap-10 lg:grid-cols-3">

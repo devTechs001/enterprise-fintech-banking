@@ -50,7 +50,17 @@ const TransactionItem = ({ transaction, variant = 'default', onClick }) => {
 
   return (
     <div
+      // The whole row is the control that opens the transaction, so it is exposed as
+      // a button: it takes focus and Enter/Space do what a click does.
+      role="button"
+      tabIndex={0}
       onClick={() => onClick?.(transaction)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onClick?.(transaction);
+        }
+      }}
       className={cn(
         'flex items-center justify-between p-4',
         'hover:bg-gray-50 dark:hover:bg-gray-800/50',
