@@ -459,7 +459,7 @@ and the splash retires only after the session resolves.
 
 ## Known limitations and open work
 
-Tracked in Linear as **DEV-6 … DEV-13**; none are hidden by this document:
+Tracked in Linear as **DEV-6 … DEV-14**; none are hidden by this document:
 
 - **No CI, no `.github/`, no `LICENSE`** (DEV-12). No rights are granted by absence.
 - **No migrations**; schema comes from Sequelize sync in non-production (DEV-7).
@@ -477,8 +477,10 @@ Tracked in Linear as **DEV-6 … DEV-13**; none are hidden by this document:
 - **No server test files.** Jest is installed and wired to `npm run test:jest`, but
   the 57 self-checks are the only server verification today (DEV-6).
 - **591 client lint warnings** remain (`import/order`, `react/prop-types`, and the
-  advisory rules described under [Lint](#lint)). Zero errors is the gate; the
-  warnings are a backlog, not a clean bill of health.
+  advisory rules described under [Lint](#lint)) — DEV-14. Zero errors is the gate;
+  the warnings are a backlog, not a clean bill of health. 478 are auto-fixable, but
+  not by blanket-running `eslint --fix`: reordering imports can change CSS cascade
+  order and side-effectful module evaluation.
 - **The full-stack path is unexercised.** Nothing in this repository has been run
   against a live PostgreSQL or Redis in the environment where it was verified.
 
