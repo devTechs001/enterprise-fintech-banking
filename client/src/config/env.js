@@ -20,7 +20,7 @@ export const APP_VERSION = raw.VITE_APP_VERSION || '0.0.0';
 export const API_BASE_URL = raw.VITE_API_BASE_URL || '/api/v1';
 
 /** True only under a dev server (`vite`, `vite --mode mock`) or vitest. */
-export const IS_DEV = Boolean(raw.DEV) && !Boolean(raw.PROD);
+export const IS_DEV = Boolean(raw.DEV) && !raw.PROD;
 /** True in `vite build` output. */
 export const IS_PROD = Boolean(raw.PROD);
 

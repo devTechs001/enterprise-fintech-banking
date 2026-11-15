@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
@@ -71,21 +71,21 @@ NotificationProvider.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-export const useNotifications = () => {
-  const context = useContext(NotificationContext);
-  if (!context) {
-    // Degrade instead of throwing so a stray hook usage cannot white-screen the app.
-    return {
-      notifications: [],
-      unreadCount: 0,
-      isLoading: false,
-      isError: false,
-      refresh: useCallback(() => {}, []),
-      markAsRead: useCallback(async () => {}, []),
-      markAllAsRead: useCallback(async () => {}, []),
-    };
-  }
-  return context;
-};
+// Stable fallback so a consumer outside the provider degrades instead of
+// white-screening. It is a module-level constant for two reasons: the object
+// identity never changes between renders, and building it must not call hooks —
+// this branch returns early, so a hook here would break the hook order and make
+// React throw "Rendered more hooks than during the previous render".
+const EMPTY_NOTIFICATIONS = Object.freeze({
+  notifications: [],
+  unreadCount: 0,
+  isLoading: false,
+  isError: false,
+  refresh: () => {},
+  markAsRead: async () => {},
+  markAllAsRead: async () => {},
+});
+
+export const useNotifications = () => useContext(NotificationContext) || EMPTY_NOTIFICATIONS;
 
 export default NotificationContext;

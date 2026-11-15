@@ -194,7 +194,7 @@ const Dashboard = () => {
               {greeting()}, {user?.firstName}! 👋
             </h1>
             <p className="mt-1 text-gray-500 dark:text-gray-400">
-              Here's what's happening with your finances today.
+              Here&apos;s what&apos;s happening with your finances today.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -466,7 +466,7 @@ const Dashboard = () => {
                           Savings Goal Progress
                         </p>
                         <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
-                          You're 75% towards your vacation fund goal!
+                          You&apos;re 75% towards your vacation fund goal!
                         </p>
                         <div className="mt-2 h-2 bg-blue-200 dark:bg-blue-800 rounded-full overflow-hidden">
                           <div 

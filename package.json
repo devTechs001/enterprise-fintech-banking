@@ -12,22 +12,25 @@
     "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
     "dev:client": "npm run dev --workspace=client",
     "dev:server": "npm run dev --workspace=server",
-    "build": "npm run build --workspaces",
+    "build": "npm run build --workspaces --if-present",
     "build:client": "npm run build --workspace=client",
-    "build:server": "npm run build --workspace=server",
     "start": "npm run start --workspace=server",
-    "test": "npm run test --workspaces",
+    "test": "npm run test --workspaces --if-present",
     "test:client": "npm run test --workspace=client",
     "test:server": "npm run test --workspace=server",
-    "lint": "npm run lint --workspaces",
+    "lint": "npm run lint --workspaces --if-present",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
     "prepare": "husky install || true",
     "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down",
-    "docker:build": "docker-compose build"
+    "docker:down": "docker-compose down"
   },
   "devDependencies": {
     "concurrently": "^8.2.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "husky": "^8.0.3",
     "lint-staged": "^14.0.0",
     "prettier": "^3.0.0"
@@ -38,7 +41,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/enterprise-fintech-banking.git"
+    "url": "https://github.com/devTechs001/enterprise-fintech-banking.git"
   },
   "keywords": [
     "fintech",
@@ -48,5 +51,5 @@
     "enterprise"
   ],
   "author": "",
-  "license": "MIT"
+  "license": "UNLICENSED"
 }

@@ -37,6 +37,45 @@ const cardVariants = {
   },
 };
 
+/**
+ * Network mark shown on the card face.
+ *
+ * This used to be declared inside VirtualCard, which means a brand-new component
+ * type on every render: React sees a different function each time and unmounts the
+ * old subtree before mounting the new one, discarding its state and restarting its
+ * animation. Hoisting it to module scope keeps the type stable (the
+ * react-hooks/static-components rule flags exactly this).
+ */
+const CardLogo = ({ network }) => {
+  switch (String(network ?? '').toLowerCase()) {
+    case 'visa':
+      return (
+        <span className="text-xl font-bold italic text-white tracking-wider">
+          VISA
+        </span>
+      );
+    case 'mastercard':
+      return (
+        <div className="flex">
+          <div className="w-8 h-8 rounded-full bg-red-500 -mr-3" />
+          <div className="w-8 h-8 rounded-full bg-yellow-500 opacity-80" />
+        </div>
+      );
+    case 'amex':
+      return (
+        <span className="text-sm font-bold text-white">
+          AMERICAN EXPRESS
+        </span>
+      );
+    default:
+      return <CardIcon className="w-8 h-8 text-white" />;
+  }
+};
+
+CardLogo.propTypes = {
+  network: PropTypes.string,
+};
+
 const VirtualCard = ({
   card,
   variant = 'default',
@@ -90,41 +129,31 @@ const VirtualCard = ({
     }
   };
 
-  const CardLogo = () => {
-    switch (cardType.toLowerCase()) {
-      case 'visa':
-        return (
-          <span className="text-xl font-bold italic text-white tracking-wider">
-            VISA
-          </span>
-        );
-      case 'mastercard':
-        return (
-          <div className="flex">
-            <div className="w-8 h-8 rounded-full bg-red-500 -mr-3" />
-            <div className="w-8 h-8 rounded-full bg-yellow-500 opacity-80" />
-          </div>
-        );
-      case 'amex':
-        return (
-          <span className="text-sm font-bold text-white">
-            AMERICAN EXPRESS
-          </span>
-        );
-      default:
-        return <CardIcon className="w-8 h-8 text-white" />;
-    }
-  };
-
   return (
     <div
       ref={cardRef}
       className={cn(
-        'perspective-1000 cursor-pointer select-none',
+        'perspective-1000 select-none',
+        interactive && 'cursor-pointer',
         sizeClasses[size],
         className
       )}
-      onClick={handleFlip}
+      // Flipping is the card's only interaction, so when it is enabled the card is
+      // exposed as a button and answers Enter/Space — a click-only div left keyboard
+      // users unable to see the back of their own card.
+      {...(interactive
+        ? {
+            role: 'button',
+            tabIndex: 0,
+            onClick: handleFlip,
+            onKeyDown: (event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                handleFlip();
+              }
+            },
+          }
+        : {})}
     >
       <motion.div
         className="relative w-full h-full transform-style-3d"
@@ -173,7 +202,7 @@ const VirtualCard = ({
                   Contactless
                 </span>
               </div>
-              <CardLogo />
+              <CardLogo network={cardType} />
             </div>
 
             {/* Chip */}

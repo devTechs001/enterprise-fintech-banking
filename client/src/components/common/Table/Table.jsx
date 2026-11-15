@@ -1,4 +1,4 @@
-import { forwardRef, useState } from 'react';
+import { forwardRef, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { ChevronDown, ChevronUp, Search, X } from 'lucide-react';
 import { cn } from '@/utils/helpers';
@@ -28,7 +28,7 @@ const Table = forwardRef(
     const [searchTerm, setSearchTerm] = useState('');
 
     // Sort data
-    const sortedData = React.useMemo(() => {
+    const sortedData = useMemo(() => {
       let sortableItems = [...data];
       if (sortConfig.key !== null) {
         sortableItems.sort((a, b) => {
@@ -45,7 +45,7 @@ const Table = forwardRef(
     }, [data, sortConfig]);
 
     // Filter data
-    const filteredData = React.useMemo(() => {
+    const filteredData = useMemo(() => {
       if (!searchTerm) return sortedData;
       return sortedData.filter((row) =>
         Object.values(row).some((value) =>
@@ -55,7 +55,7 @@ const Table = forwardRef(
     }, [sortedData, searchTerm]);
 
     // Paginate data
-    const paginatedData = React.useMemo(() => {
+    const paginatedData = useMemo(() => {
       if (!pagination) return filteredData;
       const startIndex = (currentPage - 1) * pageSize;
       return filteredData.slice(startIndex, startIndex + pageSize);

@@ -1,3 +1,10 @@
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex --
+   The carousel container is focusable and handles ArrowLeft/ArrowRight so a keyboard
+   user can move between cards without tabbing through every control on each one. That
+   is the WAI-ARIA carousel pattern, but jsx-a11y models role="group" as
+   non-interactive and has no way to express "this region owns the arrow keys", so the
+   two rules that object to it are disabled for this file. The keyboard support they
+   ask for is the reason the element is focusable in the first place. */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { ChevronLeft, ChevronRight } from 'lucide-react';

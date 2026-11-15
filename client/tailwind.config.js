@@ -20,12 +20,11 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
-      keyframes: {
-        splash: {
-          '0%': { transform: 'translateX(-110%)' },
-          '100%': { transform: 'translateX(320%)' },
-        },
-      },
+      // A second `keyframes` block lives further down (fadeIn, slideIn, shimmer, ...).
+      // This file used to declare another `keyframes` here holding only a `splash`
+      // entry, which the later block silently overwrote: duplicate keys in an object
+      // literal mean the first never reaches Tailwind. Nothing was lost — the splash
+      // bar animation is defined inline in index.html as `@keyframes splash`.
       colors: {
         primary: {
           50: '#eff6ff',

@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useId } from 'react';
 import PropTypes from 'prop-types';
 import { Check } from 'lucide-react';
 import { cn } from '@/utils/helpers';
@@ -16,6 +16,11 @@ const Checkbox = forwardRef(
     },
     ref
   ) => {
+    // A <label> forwards activation to its labelled control, so the toggle gets an id
+    // and the label points at it. The previous <label onClick> was mouse-only: the
+    // button is natively focusable and answers Enter/Space, the label text now is too.
+    const generatedId = useId();
+    const controlId = props.id ?? generatedId;
     return (
       <div className="flex items-start gap-3">
         <button
@@ -36,6 +41,7 @@ const Checkbox = forwardRef(
             className
           )}
           {...props}
+          id={controlId}
         >
           {checked && <Check className="h-4 w-4 mx-auto" />}
         </button>
@@ -45,7 +51,7 @@ const Checkbox = forwardRef(
               'text-sm text-gray-700 dark:text-gray-300',
               disabled && 'cursor-not-allowed opacity-50'
             )}
-            onClick={() => !disabled && onChange?.(!checked)}
+            htmlFor={controlId}
           >
             {label}
           </label>

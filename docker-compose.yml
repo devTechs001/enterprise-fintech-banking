@@ -1,7 +1,21 @@
+# Backing services for local development: PostgreSQL 15 and Redis 7.
+#
+#   docker-compose up -d postgres redis
+#
+# Earlier revisions of this file also declared `server` and `client` services built
+# from docker/server/Dockerfile and docker/client/Dockerfile. That directory does not
+# exist, so `docker-compose up` failed at the build step before anything started.
+# Those definitions were removed rather than left as a trap; application container
+# images are tracked as open work (DEV-12). Run the app locally with:
+#
+#   cd server && npm install && npm run dev
+#   cd client && npm install && npm run dev:mock   # or `npm run dev` for the real API
+#
+# The credentials below are for a disposable local database only.
+
 version: '3.8'
 
 services:
-  # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
     container_name: securebank-db
@@ -19,7 +33,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # Redis
   redis:
     image: redis:7-alpine
     container_name: securebank-redis
@@ -32,48 +45,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  # Server
-  server:
-    build:
-      context: ./server
-      dockerfile: docker/server/Dockerfile
-    container_name: securebank-server
-    environment:
-      - NODE_ENV=development
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=securebank
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-    ports:
-      - '3000:3000'
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    volumes:
-      - ./server:/app
-      - /app/node_modules
-
-  # Client
-  client:
-    build:
-      context: ./client
-      dockerfile: docker/client/Dockerfile
-    container_name: securebank-client
-    environment:
-      - VITE_API_URL=http://localhost:3000/api
-    ports:
-      - '5173:5173'
-    depends_on:
-      - server
-    volumes:
-      - ./client:/app
-      - /app/node_modules
 
 volumes:
   postgres_data:

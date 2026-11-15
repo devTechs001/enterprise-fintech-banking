@@ -572,16 +572,18 @@ class TransactionService {
     switch (period) {
       case 'day':
         return new Date(now.setHours(0, 0, 0, 0));
-      case 'week':
+      case 'week': {
         const weekStart = new Date(now);
         weekStart.setDate(now.getDate() - now.getDay());
         weekStart.setHours(0, 0, 0, 0);
         return weekStart;
+      }
       case 'month':
         return new Date(now.getFullYear(), now.getMonth(), 1);
-      case 'quarter':
+      case 'quarter': {
         const quarter = Math.floor(now.getMonth() / 3);
         return new Date(now.getFullYear(), quarter * 3, 1);
+      }
       case 'year':
         return new Date(now.getFullYear(), 0, 1);
       default:

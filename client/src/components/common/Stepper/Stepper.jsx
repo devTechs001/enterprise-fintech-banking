@@ -65,15 +65,31 @@ const Step = forwardRef(
     },
     ref
   ) => {
+    // A step is a control only when the flow allows jumping to it. Announcing it as a
+    // button when it is not clickable would put a dead tab stop in the keyboard path.
+    const interactive = Boolean(isClickable && typeof onClick === 'function');
+
     return (
       <div
         ref={ref}
         className={cn(
           'flex items-center',
           orientation === 'vertical' ? 'flex-col items-start' : '',
-          isClickable && 'cursor-pointer'
+          interactive && 'cursor-pointer'
         )}
-        onClick={onClick}
+        {...(interactive
+          ? {
+              role: 'button',
+              tabIndex: 0,
+              onClick,
+              onKeyDown: (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  onClick(event);
+                }
+              },
+            }
+          : {})}
       >
         {/* Step Circle */}
         <div
